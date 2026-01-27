@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
     
     const { data, error } = await resend.emails.send({
-      from: 'Traders Market <onboarding@resend.dev>', // Replace with your verified domain
+      from: "Traders Market <noreply@tradersmarket.io>", // Replace with your verified domain
       to: [recipientEmail],
       subject: 'Your Copy of "Top 5 Trading Bots for MT5" PDF',
       html: `
