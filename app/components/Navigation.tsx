@@ -72,18 +72,21 @@ export default function Navigation() {
           <Link
             href="/"
             className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+            onClick={() => setIsMobileMenuOpen(false)}
           >
             Home
           </Link>
           <Link
             href="/bundle"
             className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+            onClick={() => setIsMobileMenuOpen(false)}
           >
             Bundle Offer
           </Link>
           <Link
             href="/blogs"
             className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+            onClick={() => setIsMobileMenuOpen(false)}
           >
             Blogs
           </Link>

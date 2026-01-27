@@ -904,18 +904,37 @@ function EmailSubscriptionSection() {
 
     setIsSubmitting(true);
 
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 800));
+    try {
+      const response = await fetch('/api/send-pdf-link', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
 
-    setIsSubmitted(true);
-    setIsSubmitting(false);
-    
-    // Reset after 5 seconds
-    setTimeout(() => {
-      setIsSubmitted(false);
-      setEmail("");
-      setEmailError("");
-    }, 5000);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setEmailError(data.error || 'Failed to send email. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitted(true);
+      setIsSubmitting(false);
+      
+      // Reset after 5 seconds
+      setTimeout(() => {
+        setIsSubmitted(false);
+        setEmail("");
+        setEmailError("");
+      }, 5000);
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      setEmailError('An error occurred. Please try again later.');
+      setIsSubmitting(false);
+    }
   };
 
   return (
