@@ -50,6 +50,98 @@ function AnimatedSection({ children }: { children: (isVisible: boolean) => React
   return <div ref={ref}>{children(isVisible)}</div>;
 }
 
+// Image Carousel Component for Backtesting Results
+function ImageCarousel({ images, altPrefix }: { images: string[]; altPrefix: string }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === 0 ? images.length - 1 : prevIndex - 1
+    );
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prevIndex) => 
+      prevIndex === images.length - 1 ? 0 : prevIndex + 1
+    );
+  };
+
+  return (
+    <div className="relative w-full mb-6">
+      {/* Carousel Container */}
+      <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-br from-slate-900/90 to-black/90 border border-amber-500/20">
+        {/* Current Image */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <img
+            src={images[currentIndex]}
+            alt={`${altPrefix} - Backtesting Result ${currentIndex + 1}`}
+            className="w-full h-full object-contain"
+          />
+        </div>
+
+        {/* Navigation Buttons */}
+        {images.length > 1 && (
+          <>
+            {/* Previous Button */}
+            <button
+              onClick={goToPrevious}
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-amber-500/30 flex items-center justify-center text-white hover:bg-amber-600/30 hover:border-amber-500/50 transition-all duration-300 group"
+              aria-label="Previous image"
+            >
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* Next Button */}
+            <button
+              onClick={goToNext}
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 backdrop-blur-sm border border-amber-500/30 flex items-center justify-center text-white hover:bg-amber-600/30 hover:border-amber-500/50 transition-all duration-300 group"
+              aria-label="Next image"
+            >
+              <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+
+        {/* Slide Indicator Dots */}
+        {images.length > 1 && (
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+            {images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index)}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                  index === currentIndex
+                    ? 'bg-amber-400 w-6'
+                    : 'bg-gray-500/50 hover:bg-gray-400/70'
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Image Counter */}
+        {images.length > 1 && (
+          <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/60 backdrop-blur-sm border border-amber-500/30">
+            <span className="text-xs text-amber-400 font-mono">
+              {currentIndex + 1} / {images.length}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Placeholder Label */}
+      <div className="mt-2 text-center">
+        <span className="text-xs text-gray-500 italic">Backtesting results placeholder - Images will be uploaded</span>
+      </div>
+    </div>
+  );
+}
+
 type Bot = {
   name: string;
   icon: React.ReactNode;
@@ -439,8 +531,343 @@ export default function BundleInfoPage() {
         )}
       </AnimatedSection>
 
-      {/* Transition Divider - Cards to Works Seamlessly */}
-      <div className="relative h-6 bg-gradient-to-b from-[#050816] via-[#0f1f4a]/20 to-[#050816]">
+      {/* Transition Divider - Cards to Premium Bots */}
+      <div className="relative h-6 bg-gradient-to-b from-[#050816] via-[#0f1f4a]/20 to-[#0a0e27]">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-600/10 to-transparent"></div>
+      </div>
+
+      {/* Premium Bots Section */}
+      <AnimatedSection>
+        {(isVisible) => (
+          <section className="relative bg-gradient-to-b from-[#0a0e27] via-[#0f172a] to-[#0f1f4a] py-20 border-y border-amber-500/10">
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              {/* Section Header */}
+              <div className={`mx-auto max-w-5xl mb-12 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-600/20 border border-amber-500/30 mb-6">
+                  <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                  </svg>
+                  <span className="text-amber-400 font-semibold text-sm uppercase tracking-wide">Exclusive Premium Collection</span>
+                </div>
+                
+                <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+                  Premium Trading Bots
+                </h2>
+                <p className="text-base sm:text-lg text-gray-300">
+                  Advanced algorithmic strategies with institutional-grade logic, precision risk control, and proven market edge
+                </p>
+              </div>
+
+              {/* Premium Bots Grid */}
+              <div className="mx-auto max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Premium Bot #1: NewYork-London Breakout */}
+                <article className={`group relative overflow-hidden rounded-2xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/30 via-[#0f172a]/90 to-amber-900/20 transition-all duration-700 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+                     style={{ transitionDelay: isVisible ? '120ms' : '0ms' }}>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition duration-500"></div>
+                  
+                  <div className="relative p-6">
+                    {/* Premium Badge */}
+                    <div className="absolute top-4 right-4">
+                      <div className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-600/20 border border-amber-500/40">
+                        <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Premium</span>
+                      </div>
+                    </div>
+
+                    {/* Bot Header */}
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        NewYork–London Breakout
+                      </h3>
+                      <p className="text-amber-400/90 font-medium text-sm">
+                        Session-based breakout strategy with ATR risk control and smart trade management
+                      </p>
+                    </div>
+
+                    {/* Backtesting Results Carousel */}
+                    <ImageCarousel 
+                      images={[
+                        'data:image/svg+xml;base64,' + btoa(`
+                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="450" fill="#0a0e27"/>
+                            <defs>
+                              <linearGradient id="equityGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+                                <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.05" />
+                              </linearGradient>
+                            </defs>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Equity Curve - Backtesting Results</text>
+                            <line x1="60" y1="80" x2="60" y2="380" stroke="#374151" stroke-width="2"/>
+                            <line x1="60" y1="380" x2="740" y2="380" stroke="#374151" stroke-width="2"/>
+                            <text x="30" y="90" font-family="monospace" font-size="11" fill="#6b7280">$15k</text>
+                            <text x="30" y="155" font-family="monospace" font-size="11" fill="#6b7280">$12k</text>
+                            <text x="30" y="230" font-family="monospace" font-size="11" fill="#6b7280">$9k</text>
+                            <text x="30" y="305" font-family="monospace" font-size="11" fill="#6b7280">$6k</text>
+                            <text x="30" y="380" font-family="monospace" font-size="11" fill="#6b7280">$3k</text>
+                            <polyline points="60,300 120,280 180,260 240,270 300,240 360,220 420,210 480,200 540,190 600,170 660,150 720,130" fill="url(#equityGrad1)" stroke="#10b981" stroke-width="2.5"/>
+                            <circle cx="720" cy="130" r="4" fill="#10b981"/>
+                            <rect x="600" y="40" width="130" height="80" fill="#0f172a" stroke="#fbbf24" stroke-width="1" rx="4"/>
+                            <text x="610" y="60" font-family="monospace" font-size="10" fill="#9ca3af">Win Rate: 68.5%</text>
+                            <text x="610" y="75" font-family="monospace" font-size="10" fill="#9ca3af">Profit Factor: 2.3</text>
+                            <text x="610" y="90" font-family="monospace" font-size="10" fill="#9ca3af">Total Trades: 247</text>
+                            <text x="610" y="105" font-family="monospace" font-size="10" fill="#10b981">Net Profit: +$11,234</text>
+                          </svg>
+                        `),
+                        'data:image/svg+xml;base64,' + btoa(`
+                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="450" fill="#0a0e27"/>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Monthly Performance Statistics</text>
+                            <rect x="80" y="70" width="640" height="320" fill="#0f172a" stroke="#374151" stroke-width="1" rx="8"/>
+                            ${[
+                              { month: 'Jan', profit: 850, y: 100 },
+                              { month: 'Feb', profit: 1200, y: 140 },
+                              { month: 'Mar', profit: -200, y: 180 },
+                              { month: 'Apr', profit: 950, y: 220 },
+                              { month: 'May', profit: 1400, y: 260 },
+                              { month: 'Jun', profit: 1100, y: 300 }
+                            ].map(m => `
+                              <text x="120" y="${m.y}" font-family="monospace" font-size="13" fill="#d1d5db" font-weight="bold">${m.month}</text>
+                              <rect x="170" y="${m.y - 14}" width="${Math.abs(m.profit) / 5}" height="18" fill="${m.profit > 0 ? '#10b981' : '#ef4444'}" opacity="0.8"/>
+                              <text x="${170 + Math.abs(m.profit) / 5 + 10}" y="${m.y}" font-family="monospace" font-size="12" fill="${m.profit > 0 ? '#10b981' : '#ef4444'}">$${m.profit}</text>
+                            `).join('')}
+                            <text x="400" y="360" font-family="monospace" font-size="12" fill="#9ca3af" text-anchor="middle">Average Monthly Return: $1,050 | Max Drawdown: -3.2%</text>
+                          </svg>
+                        `),
+                        'data:image/svg+xml;base64,' + btoa(`
+                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="450" fill="#0a0e27"/>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Trade Distribution Analysis</text>
+                            <circle cx="300" cy="230" r="120" fill="none" stroke="#374151" stroke-width="2"/>
+                            <path d="M 300 230 L 300 110 A 120 120 0 0 1 395 170 Z" fill="#10b981" opacity="0.8"/>
+                            <path d="M 300 230 L 395 170 A 120 120 0 0 1 385 310 Z" fill="#3b82f6" opacity="0.8"/>
+                            <path d="M 300 230 L 385 310 A 120 120 0 0 1 205 290 Z" fill="#8b5cf6" opacity="0.8"/>
+                            <path d="M 300 230 L 205 290 A 120 120 0 0 1 300 110 Z" fill="#ef4444" opacity="0.6"/>
+                            <rect x="470" y="140" width="250" height="200" fill="#0f172a" stroke="#374151" stroke-width="1" rx="4"/>
+                            <rect x="485" y="160" width="15" height="15" fill="#10b981" opacity="0.8"/>
+                            <text x="510" y="172" font-family="monospace" font-size="12" fill="#d1d5db">Winning Trades (68.5%)</text>
+                            <rect x="485" y="190" width="15" height="15" fill="#3b82f6" opacity="0.8"/>
+                            <text x="510" y="202" font-family="monospace" font-size="12" fill="#d1d5db">Breakeven (12%)</text>
+                            <rect x="485" y="220" width="15" height="15" fill="#8b5cf6" opacity="0.8"/>
+                            <text x="510" y="232" font-family="monospace" font-size="12" fill="#d1d5db">Small Loss (15%)</text>
+                            <rect x="485" y="250" width="15" height="15" fill="#ef4444" opacity="0.6"/>
+                            <text x="510" y="262" font-family="monospace" font-size="12" fill="#d1d5db">Stop Loss (4.5%)</text>
+                            <text x="400" y="400" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Total Trades: 247 | Avg Win: $156 | Avg Loss: $68</text>
+                          </svg>
+                        `)
+                      ]}
+                      altPrefix="NewYork-London Breakout"
+                    />
+
+                    {/* Core Concepts (Collapsed) */}
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Core Concept</p>
+                        <p className="text-gray-200 text-sm leading-relaxed">
+                          Trades high-probability breakouts from the London and New York pre-session ranges, targeting strong liquidity-driven moves at session open
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Market Structure</p>
+                        <p className="text-gray-200 text-sm leading-relaxed">
+                          Session Range (Breakout Box): High and Low calculated from predefined time window before session open, using M1 price data for precise range detection
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Key Highlights</p>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          {[
+                            "ATR-Based Stop Loss",
+                            "Fixed R:R Take Profit",
+                            "Auto Position Sizing",
+                            "Built-in Trailing Stop",
+                            "Daily P&L Limits",
+                            "Session Control"
+                          ].map((feature, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <svg className="w-3 h-3 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-gray-300 text-xs">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+
+                {/* Premium Bot #2: RSI Divergence */}
+                <article className={`group relative overflow-hidden rounded-2xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/30 via-[#0f172a]/90 to-amber-900/20 transition-all duration-700 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
+                     style={{ transitionDelay: isVisible ? '180ms' : '0ms' }}>
+                  <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition duration-500"></div>
+                  
+                  <div className="relative p-6">
+                    {/* Premium Badge */}
+                    <div className="absolute top-4 right-4">
+                      <div className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-600/20 border border-amber-500/40">
+                        <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Premium</span>
+                      </div>
+                    </div>
+
+                    {/* Bot Header */}
+                    <div className="mb-6">
+                      <h3 className="text-xl font-bold text-white mb-2">
+                        RSI Divergence
+                      </h3>
+                      <p className="text-amber-400/90 font-medium text-sm">
+                        Momentum divergence strategy with price action confirmation and New York session control
+                      </p>
+                    </div>
+
+                    {/* Backtesting Results Carousel */}
+                    <ImageCarousel 
+                      images={[
+                        'data:image/svg+xml;base64,' + btoa(`
+                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="450" fill="#0a0e27"/>
+                            <defs>
+                              <linearGradient id="equityGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.05" />
+                              </linearGradient>
+                            </defs>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Cumulative Profit - RSI Divergence Strategy</text>
+                            <line x1="60" y1="80" x2="60" y2="380" stroke="#374151" stroke-width="2"/>
+                            <line x1="60" y1="380" x2="740" y2="380" stroke="#374151" stroke-width="2"/>
+                            <text x="30" y="90" font-family="monospace" font-size="11" fill="#6b7280">$18k</text>
+                            <text x="30" y="155" font-family="monospace" font-size="11" fill="#6b7280">$15k</text>
+                            <text x="30" y="230" font-family="monospace" font-size="11" fill="#6b7280">$10k</text>
+                            <text x="30" y="305" font-family="monospace" font-size="11" fill="#6b7280">$5k</text>
+                            <text x="30" y="380" font-family="monospace" font-size="11" fill="#6b7280">$0</text>
+                            <polyline points="60,370 120,350 180,340 240,330 300,310 360,290 420,280 480,260 540,240 600,210 660,180 720,140" fill="url(#equityGrad2)" stroke="#3b82f6" stroke-width="2.5"/>
+                            <circle cx="720" cy="140" r="4" fill="#3b82f6"/>
+                            <rect x="600" y="40" width="130" height="80" fill="#0f172a" stroke="#fbbf24" stroke-width="1" rx="4"/>
+                            <text x="610" y="60" font-family="monospace" font-size="10" fill="#9ca3af">Win Rate: 71.2%</text>
+                            <text x="610" y="75" font-family="monospace" font-size="10" fill="#9ca3af">Profit Factor: 2.8</text>
+                            <text x="610" y="90" font-family="monospace" font-size="10" fill="#9ca3af">Total Trades: 183</text>
+                            <text x="610" y="105" font-family="monospace" font-size="10" fill="#3b82f6">Net Profit: +$17,845</text>
+                          </svg>
+                        `),
+                        'data:image/svg+xml;base64,' + btoa(`
+                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="450" fill="#0a0e27"/>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Drawdown Analysis</text>
+                            <line x1="60" y1="100" x2="60" y2="340" stroke="#374151" stroke-width="2"/>
+                            <line x1="60" y1="340" x2="740" y2="340" stroke="#374151" stroke-width="2"/>
+                            <line x1="60" y1="100" x2="740" y2="100" stroke="#10b981" stroke-width="1" stroke-dasharray="4,4"/>
+                            <text x="30" y="105" font-family="monospace" font-size="11" fill="#10b981">0%</text>
+                            <text x="30" y="160" font-family="monospace" font-size="11" fill="#6b7280">-2%</text>
+                            <text x="30" y="220" font-family="monospace" font-size="11" fill="#6b7280">-4%</text>
+                            <text x="30" y="280" font-family="monospace" font-size="11" fill="#6b7280">-6%</text>
+                            <text x="30" y="340" font-family="monospace" font-size="11" fill="#6b7280">-8%</text>
+                            <defs>
+                              <linearGradient id="ddGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.05" />
+                                <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.3" />
+                              </linearGradient>
+                            </defs>
+                            <polyline points="60,100 120,105 180,110 240,115 300,120 360,130 420,115 480,110 540,120 600,125 660,115 720,105" fill="url(#ddGrad)" stroke="#ef4444" stroke-width="2.5"/>
+                            <rect x="80" y="360" width="640" height="60" fill="#0f172a" stroke="#374151" stroke-width="1" rx="4"/>
+                            <text x="400" y="385" font-family="monospace" font-size="12" fill="#d1d5db" text-anchor="middle">Maximum Drawdown: -2.8% | Average Drawdown: -1.1%</text>
+                            <text x="400" y="405" font-family="monospace" font-size="11" fill="#10b981" text-anchor="middle">Recovery Factor: 6.37 | Sharpe Ratio: 2.14</text>
+                          </svg>
+                        `),
+                        'data:image/svg+xml;base64,' + btoa(`
+                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="800" height="450" fill="#0a0e27"/>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Risk-Reward Distribution</text>
+                            <rect x="100" y="80" width="600" height="280" fill="#0f172a" stroke="#374151" stroke-width="1" rx="4"/>
+                            ${[
+                              { label: 'R:R 1:1', count: 15, x: 130, color: '#8b5cf6' },
+                              { label: 'R:R 1:2', count: 45, x: 230, color: '#3b82f6' },
+                              { label: 'R:R 1:3', count: 85, x: 330, color: '#10b981' },
+                              { label: 'R:R 1:4', count: 35, x: 430, color: '#06b6d4' },
+                              { label: 'R:R 1:5+', count: 18, x: 530, color: '#84cc16' }
+                            ].map(item => `
+                              <rect x="${item.x}" y="${340 - item.count * 2}" width="70" height="${item.count * 2}" fill="${item.color}" opacity="0.85" rx="2"/>
+                              <text x="${item.x + 35}" y="${340 - item.count * 2 - 8}" font-family="monospace" font-size="13" fill="${item.color}" text-anchor="middle" font-weight="bold">${item.count}</text>
+                              <text x="${item.x + 35}" y="375" font-family="monospace" font-size="10" fill="#9ca3af" text-anchor="middle">${item.label}</text>
+                            `).join('')}
+                            <text x="400" y="410" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Average R:R Achieved: 1:2.8 | Best Trade: +$845 | Worst Trade: -$142</text>
+                          </svg>
+                        `)
+                      ]}
+                      altPrefix="RSI Divergence"
+                    />
+
+                    {/* Core Concepts (Collapsed) */}
+                    <div className="space-y-3">
+                      <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Core Concept</p>
+                        <p className="text-gray-200 text-sm leading-relaxed">
+                          Trades high-probability market reversals using RSI divergence, enhanced with optional price action confirmation and strict risk management
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Market Logic</p>
+                        <p className="text-gray-200 text-sm leading-relaxed">
+                          Detects bullish and bearish divergences by comparing price structure with RSI momentum over a configurable lookback period
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Key Highlights</p>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                          {[
+                            "ATR-Based Stop Loss",
+                            "Fixed R:R or Trailing",
+                            "Auto Position Sizing",
+                            "NY Session Control",
+                            "Daily P&L Limits",
+                            "Flexible Confirmation"
+                          ].map((feature, idx) => (
+                            <div key={idx} className="flex items-center gap-2">
+                              <svg className="w-3 h-3 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span className="text-gray-300 text-xs">{feature}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              </div>
+
+              {/* Bottom Note & CTA */}
+              <div className={`text-center mt-8 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                   style={{ transitionDelay: isVisible ? '300ms' : '0ms' }}>
+                <p className="text-gray-400 text-sm mb-6">
+                  Both premium bots are included in the complete bundle
+                </p>
+
+                {/* CTA Button to Bundle Offer */}
+                <Link
+                  href="/bundle-offer"
+                  className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 px-10 py-4 text-lg font-bold text-white transition-all duration-300 hover:from-amber-500 hover:via-yellow-500 hover:to-amber-500 hover:shadow-[0_0_40px_rgba(251,191,36,0.6)] hover:scale-[1.05] border-2 border-amber-500/40 active:scale-[0.98]"
+                >
+                  <span className="relative z-10 flex items-center gap-3">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    <span>Get Premium Access Now</span>
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-500 via-amber-600 to-yellow-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100 rounded-xl" />
+                </Link>
+                <p className="text-amber-400/80 text-sm mt-4 font-medium">
+                  Instant access to all premium bots and features
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+      </AnimatedSection>
+
+      {/* Transition Divider - Premium Bots to Works Seamlessly */}
+      <div className="relative h-6 bg-gradient-to-b from-[#0f1f4a] via-[#0f172a] to-[#050816]">
         <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-600/10 to-transparent"></div>
       </div>
 
