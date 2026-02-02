@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { db, auth } from '@/lib/firebase';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
@@ -14,9 +15,10 @@ interface UserProfile {
   dateOfBirth: string;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   // Profile form states
   const [firstName, setFirstName] = useState('');
@@ -40,11 +42,9 @@ export default function DashboardPage() {
     confirmPassword?: string;
   }>({});
 
-  // Access status state
-  const [subscriptionStatus, setSubscriptionStatus] = useState<'active' | 'inactive'>('inactive');
-  const [isActivating, setIsActivating] = useState(false);
+  // Payment status state
+  const [hasPaid, setHasPaid] = useState<boolean>(false);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
-  const [activationMessage, setActivationMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -84,8 +84,14 @@ export default function DashboardPage() {
             setDateOfBirth(profileData.dateOfBirth);
             setOriginalProfile(profileData);
 
-            // Load access status
-            setSubscriptionStatus(data.accessStatus || 'inactive');
+            // Load payment status
+            const paid = data.hasPaid === true;
+            setHasPaid(paid);
+            
+            // If user has paid, redirect to bots dashboard immediately
+            if (paid) {
+              router.push('/dashboard/bots');
+            }
           }
         } catch (error) {
           console.error('Error loading user data:', error);
@@ -96,7 +102,31 @@ export default function DashboardPage() {
     };
 
     loadUserData();
-  }, [user]);
+  }, [user, router]);
+
+  // Check for payment success after redirect
+  useEffect(() => {
+    const paymentSuccess = searchParams?.get('payment_success');
+    if (paymentSuccess === 'true' && user) {
+      // Wait a moment for webhook to process, then reload payment status
+      setTimeout(async () => {
+        try {
+          const userDocRef = doc(db, 'users', user.uid);
+          const userDoc = await getDoc(userDocRef);
+          if (userDoc.exists()) {
+            const data = userDoc.data();
+            if (data.hasPaid === true) {
+              setHasPaid(true);
+              // Redirect to bots dashboard if payment successful
+              router.push('/dashboard/bots');
+            }
+          }
+        } catch (error) {
+          console.error('Error checking payment status:', error);
+        }
+      }, 2000);
+    }
+  }, [searchParams, user, router]);
 
   if (loading) {
     return (
@@ -166,38 +196,6 @@ export default function DashboardPage() {
     setProfileMessage(null);
   };
 
-  const handleActivateAccess = async () => {
-    if (!user) return;
-
-    setIsActivating(true);
-    setActivationMessage(null);
-
-    try {
-      // Update access status in Firestore
-      const userDocRef = doc(db, 'users', user.uid);
-      await setDoc(userDocRef, { accessStatus: 'active' }, { merge: true });
-
-      // Update local state
-      setSubscriptionStatus('active');
-
-      // Show success message
-      setActivationMessage({ 
-        type: 'success', 
-        text: 'Access activated successfully! You now have full access to all premium features.' 
-      });
-
-      // Clear success message after 5 seconds
-      setTimeout(() => setActivationMessage(null), 5000);
-    } catch (error) {
-      console.error('Error activating access:', error);
-      setActivationMessage({ 
-        type: 'error', 
-        text: 'Failed to activate access. Please try again or contact support.' 
-      });
-    } finally {
-      setIsActivating(false);
-    }
-  };
 
   const handleChangePassword = async () => {
     if (!user || !user.email) return;
@@ -579,28 +577,6 @@ export default function DashboardPage() {
                 Access Status
               </h2>
 
-              {/* Activation Success/Error Message */}
-              {activationMessage && (
-                <div className={`max-w-3xl mx-auto mb-6 p-4 rounded-lg border ${
-                  activationMessage.type === 'success'
-                    ? 'bg-green-500/10 border-green-500/50 text-green-400'
-                    : 'bg-red-500/10 border-red-500/50 text-red-400'
-                } animate-fade-in`}>
-                  <div className="flex items-center gap-3">
-                    {activationMessage.type === 'success' ? (
-                      <svg className="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    ) : (
-                      <svg className="w-6 h-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    )}
-                    <span className="font-medium">{activationMessage.text}</span>
-                  </div>
-                </div>
-              )}
-              
               <div className="max-w-3xl mx-auto">
                 {/* Loading State */}
                 {isLoadingStatus ? (
@@ -620,17 +596,17 @@ export default function DashboardPage() {
                     {/* Decorative top accent line - Always Blue */}
                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-1 rounded-b-full bg-gradient-to-r from-transparent via-blue-500 to-transparent"></div>
 
-                    {/* Status Badge - Changes Color Based on Status */}
+                    {/* Status Badge - Changes Color Based on Payment Status */}
                     <div className="absolute top-6 right-6">
-                      {subscriptionStatus === 'active' ? (
+                      {hasPaid ? (
                         <div className="px-4 py-2 rounded-full bg-gradient-to-r from-green-500/40 to-emerald-600/40 border-2 border-green-500/60 flex items-center gap-2 shadow-lg shadow-green-500/20">
                           <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50"></div>
-                          <span className="text-sm font-bold text-green-300 uppercase tracking-wider">Active</span>
+                          <span className="text-sm font-bold text-green-300 uppercase tracking-wider">Paid</span>
                         </div>
                       ) : (
                         <div className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600/30 to-blue-700/30 border-2 border-blue-600/50 flex items-center gap-2 shadow-lg shadow-blue-600/20">
                           <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></div>
-                          <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">Inactive</span>
+                          <span className="text-sm font-bold text-blue-400 uppercase tracking-wider">Unpaid</span>
                         </div>
                       )}
                     </div>
@@ -672,39 +648,47 @@ export default function DashboardPage() {
 
                     {/* Footer with Button */}
                     <div className="pt-6 border-t-2 border-blue-500/30">
-                      <button
-                        onClick={subscriptionStatus === 'active' ? undefined : handleActivateAccess}
-                        disabled={subscriptionStatus === 'active' || isActivating}
-                        className={`w-full py-4 px-8 rounded-xl text-white text-lg font-bold transition-all duration-300 flex items-center justify-center gap-3 ${
-                          subscriptionStatus === 'active'
-                            ? 'bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 cursor-not-allowed'
-                            : 'bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 hover:from-blue-500 hover:via-blue-600 hover:to-blue-500 hover:shadow-2xl hover:shadow-blue-600/50 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none'
-                        }`}
-                      >
-                        {subscriptionStatus === 'active' ? (
-                          <>
+                      {hasPaid ? (
+                        <>
+                          <Link
+                            href="/dashboard/bots"
+                            onClick={(e) => {
+                              // Double-check payment status before navigating
+                              if (!hasPaid && user?.email) {
+                                e.preventDefault();
+                                const checkoutUrl = `http://localhost:3001/checkout?email=${encodeURIComponent(user.email)}`;
+                                window.location.href = checkoutUrl;
+                              }
+                            }}
+                            className="w-full py-4 px-8 rounded-xl text-white text-lg font-bold transition-all duration-300 flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 via-emerald-600 to-green-600 hover:from-green-500 hover:via-emerald-500 hover:to-green-500 hover:shadow-2xl hover:shadow-green-600/50 hover:scale-[1.02] active:scale-[0.98]"
+                          >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <span>Activated</span>
-                          </>
-                        ) : isActivating ? (
-                          <>
-                            <div className="w-6 h-6 border-3 border-white border-t-transparent rounded-full animate-spin"></div>
-                            <span>Activating...</span>
-                          </>
-                        ) : (
-                          <>
+                            <span>Access Your Bots</span>
+                          </Link>
+                          <p className="text-center text-green-400/80 text-sm mt-4 font-medium">
+                            Click to view all premium trading bots
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <a
+                            href={user?.email ? `http://localhost:3001/checkout?email=${encodeURIComponent(user.email)}` : 'http://localhost:3001/checkout'}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full py-4 px-8 rounded-xl text-white text-lg font-bold transition-all duration-300 flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 hover:from-blue-500 hover:via-blue-600 hover:to-blue-500 hover:shadow-2xl hover:shadow-blue-600/50 hover:scale-[1.02] active:scale-[0.98]"
+                          >
                             <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15l1-4m4 4l1-4m-6 0V9a2 2 0 012-2h6a2 2 0 012 2v2M7 15h10" />
                             </svg>
-                            <span>Activate Access</span>
-                          </>
-                        )}
-                      </button>
-                      <p className="text-center text-blue-400/80 text-sm mt-4 font-medium">
-                        Get full access to all premium features
-                      </p>
+                            <span>Pay Now</span>
+                          </a>
+                          <p className="text-center text-blue-400/80 text-sm mt-4 font-medium">
+                            Complete payment to unlock all premium features
+                          </p>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -721,19 +705,19 @@ export default function DashboardPage() {
                   <span className="text-white font-medium">{user.email}</span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-b border-blue-600/20">
-                  <span className="text-gray-400">Access Status</span>
+                  <span className="text-gray-400">Payment Status</span>
                   <span className={`font-medium flex items-center gap-2 ${
-                    subscriptionStatus === 'active' ? 'text-green-400' : 'text-blue-500'
+                    hasPaid ? 'text-green-400' : 'text-blue-500'
                   }`}>
-                    {subscriptionStatus === 'active' ? (
+                    {hasPaid ? (
                       <>
                         <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse shadow-lg shadow-green-400/50"></div>
-                        <span>Active</span>
+                        <span>Paid</span>
                       </>
                     ) : (
                       <>
                         <div className="w-2 h-2 rounded-full bg-blue-500 shadow-lg shadow-blue-500/50"></div>
-                        <span>Inactive</span>
+                        <span>Unpaid</span>
                       </>
                     )}
                   </span>
@@ -752,5 +736,22 @@ export default function DashboardPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading...</p>
+          </div>
+        </main>
+      }
+    >
+      <DashboardContent />
+    </Suspense>
   );
 }

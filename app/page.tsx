@@ -175,7 +175,7 @@ export default function Home() {
                   href="/bundle"
                   className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:scale-105 border border-blue-600/30"
                 >
-                  <span className="relative z-10">Buy for $159</span>
+                  <span className="relative z-10">Buy for $259</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
                 </Link>
               </div>

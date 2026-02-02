@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
               
               <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 15px; margin: 20px 0;">
                 <p style="margin: 0; color: #1e40af;"><strong>Ready to take the next step?</strong></p>
-                <p style="margin: 10px 0 0 0; color: #1e40af;">Get access to our complete bundle of 10+ expert-designed trading strategies for just $159.</p>
+                <p style="margin: 10px 0 0 0; color: #1e40af;">Get access to our complete bundle of 10+ expert-designed trading strategies for just $259.</p>
               </div>
               
               <div style="text-align: center; margin: 30px 0;">

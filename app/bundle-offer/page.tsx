@@ -1,8 +1,22 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function BundleOffer() {
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handlePurchase = () => {
+    if (user?.email) {
+      const checkoutUrl = `http://localhost:3001/checkout?email=${encodeURIComponent(user.email)}`;
+      window.location.href = checkoutUrl;
+    } else {
+      // Redirect to login if not authenticated
+      router.push('/login?redirect=/bundle-offer');
+    }
+  };
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050816] via-[#0f172a] via-[#0f1f4a] to-[#050816]">
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
@@ -23,7 +37,7 @@ export default function BundleOffer() {
             <div className="relative">
               <div className="text-center">
                 <div className="mb-4">
-                  <span className="text-5xl font-bold text-white">$159</span>
+                  <span className="text-5xl font-bold text-white">$259</span>
                   <span className="text-gray-400 ml-2">one-time payment</span>
                 </div>
                 <p className="text-gray-300 mb-8">
@@ -93,8 +107,11 @@ export default function BundleOffer() {
               </div>
 
               {/* CTA Button */}
-              <button className="w-full rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:scale-105 border border-blue-600/30">
-                Purchase Bundle - $159
+              <button 
+                onClick={handlePurchase}
+                className="w-full rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:scale-105 border border-blue-600/30"
+              >
+                Purchase Bundle - $259
               </button>
             </div>
           </div>

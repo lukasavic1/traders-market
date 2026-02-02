@@ -344,7 +344,7 @@ export default function BundleInfoPage() {
                   href="/bundle-offer"
                   className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_34px_rgba(59,130,246,0.65)] hover:scale-[1.03] border border-blue-600/30"
                 >
-                  <span className="relative z-10">Buy for $159</span>
+                  <span className="relative z-10">Buy for $259</span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </Link>
 
@@ -1289,7 +1289,7 @@ export default function BundleInfoPage() {
                     <div className="relative">
                       <div className="text-sm text-gray-300">Only</div>
                       <div className="mt-2 flex items-end gap-2">
-                        <div className="text-5xl font-bold text-white">€159</div>
+                        <div className="text-5xl font-bold text-white">€259</div>
                       </div>
                       <div className="mt-4 text-gray-300">
                         One-time payment • Immediate download • Lifetime access
