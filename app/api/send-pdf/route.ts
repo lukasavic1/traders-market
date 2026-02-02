@@ -3,7 +3,7 @@ import { Resend } from 'resend';
 import fs from 'fs/promises';
 import path from 'path';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.TRADERS_MARKET_RESEND_API_KEY);
 
 // Configure longer timeout for large file handling (in milliseconds)
 export const maxDuration = 60; // 60 seconds for Pro plans, adjust as needed

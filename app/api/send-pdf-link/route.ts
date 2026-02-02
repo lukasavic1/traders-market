@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.TRADERS_MARKET_RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
   console.log('[send-pdf-link] Request received');
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get the base URL (for production, you'd use your actual domain)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+    const baseUrl = process.env.NEXT_PUBLIC_TRADERS_MARKET_BASE_URL || 'http://localhost:3000';
     const pdfDownloadUrl = `${baseUrl}/pdf/Top5BotsPDF.pdf`;
 
     console.log('[send-pdf-link] PDF download URL:', pdfDownloadUrl);
