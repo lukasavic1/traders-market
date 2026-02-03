@@ -48,7 +48,7 @@ export default function SignUpPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await createUserDocument(userCredential.user.uid, userCredential.user.email || email);
-      router.push('/dashboard');
+      router.replace('/auth/redirect');
     } catch (error: any) {
       console.error('Sign up error:', error);
       if (error.code === 'auth/email-already-in-use') {
@@ -72,7 +72,7 @@ export default function SignUpPage() {
     try {
       const result = await signInWithPopup(auth, googleProvider);
       await createUserDocument(result.user.uid, result.user.email || '');
-      router.push('/dashboard');
+      router.replace('/auth/redirect');
     } catch (error: any) {
       console.error('Google sign up error:', error);
       if (error.code === 'auth/popup-closed-by-user') {

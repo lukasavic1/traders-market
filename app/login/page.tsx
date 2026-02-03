@@ -66,8 +66,8 @@ export default function LoginPage() {
           
           // Log successful login to analytics
           logAuthEvent('login', 'email');
-          
-          router.push('/dashboard');
+          // Redirect to /auth/redirect so hasActiveSubscription drives final destination (no /dashboard flash)
+          router.replace('/auth/redirect');
         },
         { method: 'email' }
       );
@@ -109,8 +109,8 @@ export default function LoginPage() {
           
           // Log successful login to analytics
           logAuthEvent('login', 'google');
-          
-          router.push('/dashboard');
+          // Redirect to /auth/redirect so hasActiveSubscription drives final destination (no /dashboard flash)
+          router.replace('/auth/redirect');
         },
         { method: 'google' }
       );

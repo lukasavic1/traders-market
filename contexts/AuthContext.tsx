@@ -18,12 +18,15 @@ import { trackAuthError } from '@/lib/errorTracking';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  /** True if user has paid/subscription; false if free; undefined while loading from Firestore */
+  hasActiveSubscription: boolean | undefined;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  hasActiveSubscription: undefined,
   signOut: async () => {},
 });
 
@@ -38,49 +41,53 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-      
-      // Analytics: Set user ID and properties
-      if (user) {
-        setAnalyticsUserId(user.uid);
-        
-        try {
-          // Get user data from Firestore to set additional properties
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setAnalyticsUserProperties({
-              subscription_status: userData.hasPaid ? 'premium' : 'free',
-              has_paid: userData.hasPaid || false,
-              signup_date: userData.createdAt || new Date().toISOString(),
-              email_verified: user.emailVerified,
-            });
-          } else {
-            setAnalyticsUserProperties({
-              subscription_status: 'free',
-              has_paid: false,
-              email_verified: user.emailVerified,
-            });
-          }
-        } catch (error) {
-          console.error('Error loading user properties:', error);
-          // Still set basic properties even if Firestore fetch fails
+
+      if (!user) {
+        setHasActiveSubscription(undefined);
+        setAnalyticsUserId(null);
+        setLoading(false);
+        return;
+      }
+
+      setAnalyticsUserId(user.uid);
+
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          const paid = userData.hasPaid === true;
+          setHasActiveSubscription(paid);
+          setAnalyticsUserProperties({
+            subscription_status: paid ? 'premium' : 'free',
+            has_paid: paid,
+            signup_date: userData.createdAt || new Date().toISOString(),
+            email_verified: user.emailVerified,
+          });
+        } else {
+          setHasActiveSubscription(false);
           setAnalyticsUserProperties({
             subscription_status: 'free',
             has_paid: false,
             email_verified: user.emailVerified,
           });
         }
-      } else {
-        // Clear user ID when signed out
-        setAnalyticsUserId(null);
+      } catch (error) {
+        console.error('Error loading user properties:', error);
+        setHasActiveSubscription(false);
+        setAnalyticsUserProperties({
+          subscription_status: 'free',
+          has_paid: false,
+          email_verified: user.emailVerified,
+        });
       }
-      
+
       setLoading(false);
     });
 
@@ -105,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value = {
     user,
     loading,
+    hasActiveSubscription,
     signOut,
   };
 

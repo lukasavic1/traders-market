@@ -35,10 +35,7 @@ export const logAnalyticsEvent = (
   eventName: TraderMarketEvent,
   params?: EventParams
 ) => {
-  if (!analytics) {
-    console.warn('Analytics not initialized');
-    return;
-  }
+  if (!analytics) return;
 
   try {
     // Firebase SDK types only include a subset of events; custom names (e.g. page_view, login) are valid at runtime
@@ -47,8 +44,8 @@ export const logAnalyticsEvent = (
       timestamp: Date.now(),
       app_name: 'Traders Market',
     });
-  } catch (error) {
-    console.error('Error logging analytics event:', error);
+  } catch {
+    // Silently ignore analytics logging errors
   }
 };
 
@@ -157,8 +154,8 @@ export const setAnalyticsUserId = (userId: string | null) => {
     if (userId) {
       setUserId(analytics, userId);
     }
-  } catch (error) {
-    console.error('Error setting analytics user ID:', error);
+  } catch {
+    // Silently ignore analytics user ID errors
   }
 };
 
@@ -176,8 +173,8 @@ export const setAnalyticsUserProperties = (properties: {
 
   try {
     setUserProperties(analytics, properties);
-  } catch (error) {
-    console.error('Error setting analytics user properties:', error);
+  } catch {
+    // Silently ignore analytics user properties errors
   }
 };
 

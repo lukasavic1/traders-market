@@ -26,13 +26,6 @@ export function MonitoringProvider({ children }: MonitoringProviderProps) {
 
     // Initialize error tracking
     initializeErrorTracking();
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔥 Firebase Monitoring initialized');
-      console.log('✅ Analytics enabled');
-      console.log('✅ Performance monitoring enabled');
-      console.log('✅ Error tracking enabled');
-    }
   }, []);
 
   // Track page views on route changes

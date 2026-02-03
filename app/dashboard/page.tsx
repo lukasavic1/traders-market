@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,74 +8,40 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
 
 function DashboardContent() {
-  const { user, loading } = useAuth();
+  const { user, loading, hasActiveSubscription } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
-
-  // Payment status state
-  const [hasPaid, setHasPaid] = useState<boolean>(false);
-  const [isLoadingStatus, setIsLoadingStatus] = useState(true);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
+      return;
     }
-  }, [user, loading, router]);
+    // Paid users: redirect straight to bots (no intermediate dashboard view)
+    if (user && hasActiveSubscription === true) {
+      router.replace('/dashboard/bots');
+    }
+  }, [user, loading, hasActiveSubscription, router]);
 
-  // Load user payment status from Firestore
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (user) {
-        try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-          
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            
-            // Load payment status
-            const paid = data.hasPaid === true;
-            setHasPaid(paid);
-            
-            // If user has paid, redirect to bots dashboard immediately
-            if (paid) {
-              router.push('/dashboard/bots');
-            }
-          }
-        } catch (error) {
-          console.error('Error loading user data:', error);
-        } finally {
-          setIsLoadingStatus(false);
-        }
-      }
-    };
-
-    loadUserData();
-  }, [user, router]);
-
-  // Check for payment success after redirect
+  // After payment success, webhook may have updated Firestore; refetch and redirect to bots
   useEffect(() => {
     const paymentSuccess = searchParams?.get('payment_success');
-    if (paymentSuccess === 'true' && user) {
-      // Wait a moment for webhook to process, then reload payment status
-      setTimeout(async () => {
-        try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
-          if (userDoc.exists()) {
-            const data = userDoc.data();
-            if (data.hasPaid === true) {
-              setHasPaid(true);
-              // Redirect to bots dashboard if payment successful
-              router.push('/dashboard/bots');
-            }
-          }
-        } catch (error) {
-          console.error('Error checking payment status:', error);
+    if (paymentSuccess !== 'true' || !user) return;
+    const t = setTimeout(async () => {
+      try {
+        const userDocRef = doc(db, 'users', user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists() && userDoc.data().hasPaid === true) {
+          router.replace('/dashboard/bots');
         }
-      }, 2000);
-    }
+      } catch (error) {
+        console.error('Error checking payment status:', error);
+      }
+    }, 2000);
+    return () => clearTimeout(t);
   }, [searchParams, user, router]);
+
+  const hasPaid = hasActiveSubscription === true;
 
   if (loading) {
     return (
@@ -90,6 +56,18 @@ function DashboardContent() {
 
   if (!user) {
     return null;
+  }
+
+  // Paid users are redirected to /dashboard/bots; show loader until redirect happens
+  if (hasActiveSubscription === true) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-400 text-sm">Redirecting...</p>
+        </div>
+      </main>
+    );
   }
 
   return (
@@ -113,8 +91,8 @@ function DashboardContent() {
               </h2>
 
               <div className="max-w-3xl mx-auto">
-                {/* Loading State */}
-                {isLoadingStatus ? (
+                {/* Loading State - subscription status from AuthContext */}
+                {hasActiveSubscription === undefined ? (
                   <div className="relative rounded-2xl border-[3px] border-blue-500/50 bg-gradient-to-br from-blue-950/40 via-[#0f172a]/95 to-blue-900/30 p-12 backdrop-blur-sm shadow-2xl">
                     <div className="flex flex-col items-center justify-center gap-4">
                       <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>

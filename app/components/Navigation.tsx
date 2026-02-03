@@ -9,7 +9,8 @@ import { useRouter } from "next/navigation";
 export default function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, hasActiveSubscription, signOut } = useAuth();
+  const dashboardHref = hasActiveSubscription ? "/dashboard/bots" : "/dashboard";
   const router = useRouter();
   const userMenuRef = useRef<HTMLDivElement>(null);
 
@@ -97,9 +98,9 @@ export default function Navigation() {
                 </div>
               ) : (
                 <div className="flex items-center space-x-4">
-                  {/* Dashboard Link */}
+                  {/* Dashboard Link - paid users go straight to bots */}
                   <Link
-                    href="/dashboard"
+                    href={dashboardHref}
                     className="flex items-center space-x-2 rounded-lg border border-blue-600/30 bg-blue-950/30 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-950/50 hover:border-blue-500/50"
                   >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -236,9 +237,9 @@ export default function Navigation() {
                     <p className="text-sm font-medium text-white truncate mb-4">{user.email}</p>
                   </div>
 
-                  {/* Dashboard Link - Mobile */}
+                  {/* Dashboard Link - Mobile; paid users go straight to bots */}
                   <Link
-                    href="/dashboard"
+                    href={dashboardHref}
                     className="flex items-center gap-2 text-sm font-medium text-white transition-colors hover:text-blue-400"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
