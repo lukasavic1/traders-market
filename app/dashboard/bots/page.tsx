@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
+import { logAnalyticsEvent, logBotEvent } from '@/lib/analytics';
+import { measureOperation, TraderMarketTraces } from '@/lib/performance';
+import { trackFirestoreError } from '@/lib/errorTracking';
+import { useRenderPerformance } from '@/hooks/usePerformance';
 
 interface Bot {
   id: string;
@@ -143,6 +147,9 @@ const demoBots: Bot[] = [
 ];
 
 export default function BotsDashboardPage() {
+  // Track component render performance
+  useRenderPerformance('BotsDashboardPage');
+  
   const { user, loading } = useAuth();
   const router = useRouter();
   const [hasPaid, setHasPaid] = useState<boolean>(false);
@@ -158,13 +165,28 @@ export default function BotsDashboardPage() {
     const loadSubscriptionStatus = async () => {
       if (user) {
         try {
-          const userDocRef = doc(db, 'users', user.uid);
-          const userDoc = await getDoc(userDocRef);
+          // Measure subscription status loading performance
+          const data = await measureOperation(
+            TraderMarketTraces.LOAD_SUBSCRIPTION_STATUS,
+            async () => {
+              const userDocRef = doc(db, 'users', user.uid);
+              const userDoc = await getDoc(userDocRef);
+              return userDoc.exists() ? userDoc.data() : null;
+            },
+            { userId: user.uid }
+          );
           
-          if (userDoc.exists()) {
-            const data = userDoc.data();
+          if (data) {
             const paid = data.hasPaid === true;
             setHasPaid(paid);
+            
+            // Log dashboard access event
+            if (paid) {
+              logAnalyticsEvent('dashboard_access', {
+                page: 'bots',
+                subscription_status: 'premium',
+              });
+            }
             
             // Redirect to checkout if not paid
             if (!paid && user?.email) {
@@ -185,6 +207,10 @@ export default function BotsDashboardPage() {
           }
         } catch (error) {
           console.error('Error loading subscription status:', error);
+          trackFirestoreError(
+            'loadSubscriptionStatus',
+            error instanceof Error ? error.message : 'Unknown error'
+          );
           router.push('/dashboard');
         } finally {
           setIsLoadingStatus(false);
@@ -301,7 +327,15 @@ export default function BotsDashboardPage() {
 
                   {/* Expand/Collapse Button */}
                   <button
-                    onClick={() => setExpandedBot(isExpanded ? null : bot.id)}
+                    onClick={() => {
+                      const willExpand = !isExpanded;
+                      setExpandedBot(willExpand ? bot.id : null);
+                      
+                      // Track bot interaction
+                      if (willExpand) {
+                        logBotEvent('bot_secret_reveal', bot.id, bot.name);
+                      }
+                    }}
                     className={`mt-4 w-full rounded-xl border border-blue-600/15 bg-black/10 px-4 py-3 text-sm font-semibold transition-all duration-300 ${
                       isExpanded
                         ? 'text-blue-200 hover:text-white hover:border-blue-500/30'

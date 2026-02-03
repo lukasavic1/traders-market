@@ -1,0 +1,47 @@
+"use client";
+
+import { useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { initializePerformanceMonitoring } from '@/lib/performance';
+import { initializeErrorTracking } from '@/lib/errorTracking';
+import { logPageView } from '@/lib/analytics';
+
+interface MonitoringProviderProps {
+  children: React.ReactNode;
+}
+
+/**
+ * Provider component that initializes all monitoring services
+ * - Firebase Analytics for user behavior tracking
+ * - Firebase Performance Monitoring for performance metrics
+ * - Error Tracking for crash reporting (web alternative to Crashlytics)
+ */
+export function MonitoringProvider({ children }: MonitoringProviderProps) {
+  const pathname = usePathname();
+
+  // Initialize monitoring services once on mount
+  useEffect(() => {
+    // Initialize performance monitoring
+    initializePerformanceMonitoring();
+
+    // Initialize error tracking
+    initializeErrorTracking();
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔥 Firebase Monitoring initialized');
+      console.log('✅ Analytics enabled');
+      console.log('✅ Performance monitoring enabled');
+      console.log('✅ Error tracking enabled');
+    }
+  }, []);
+
+  // Track page views on route changes
+  useEffect(() => {
+    if (pathname) {
+      const pageTitle = document.title || pathname;
+      logPageView(pathname, pageTitle);
+    }
+  }, [pathname]);
+
+  return <>{children}</>;
+}

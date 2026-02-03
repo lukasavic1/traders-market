@@ -9,8 +9,15 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, getDoc } from 'firebase/firestore';
 import { auth, googleProvider, db } from '@/lib/firebase';
+import { logAuthEvent } from '@/lib/analytics';
+import { measureOperation, TraderMarketTraces } from '@/lib/performance';
+import { trackAuthError, trackFirestoreError } from '@/lib/errorTracking';
+import { useRenderPerformance } from '@/hooks/usePerformance';
 
 export default function LoginPage() {
+  // Track component render performance
+  useRenderPerformance('LoginPage');
+  
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,17 +26,28 @@ export default function LoginPage() {
 
   const ensureUserDocument = async (userId: string, userEmail: string) => {
     try {
-      const userDocRef = doc(db, 'users', userId);
-      const userDoc = await getDoc(userDocRef);
-      
-      if (!userDoc.exists()) {
-        await setDoc(userDocRef, {
-          email: userEmail,
-          createdAt: serverTimestamp(),
-        });
-      }
+      // Measure Firestore operation performance
+      await measureOperation(
+        TraderMarketTraces.FIRESTORE_READ,
+        async () => {
+          const userDocRef = doc(db, 'users', userId);
+          const userDoc = await getDoc(userDocRef);
+          
+          if (!userDoc.exists()) {
+            await setDoc(userDocRef, {
+              email: userEmail,
+              createdAt: serverTimestamp(),
+            });
+          }
+        },
+        { operation: 'ensureUserDocument', userId }
+      );
     } catch (error) {
       console.error('Error ensuring user document:', error);
+      trackFirestoreError(
+        'ensureUserDocument',
+        error instanceof Error ? error.message : 'Unknown error'
+      );
     }
   };
 
@@ -39,11 +57,30 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      await ensureUserDocument(userCredential.user.uid, userCredential.user.email || email);
-      router.push('/dashboard');
+      // Measure login flow performance
+      await measureOperation(
+        TraderMarketTraces.LOGIN_FLOW,
+        async () => {
+          const userCredential = await signInWithEmailAndPassword(auth, email, password);
+          await ensureUserDocument(userCredential.user.uid, userCredential.user.email || email);
+          
+          // Log successful login to analytics
+          logAuthEvent('login', 'email');
+          
+          router.push('/dashboard');
+        },
+        { method: 'email' }
+      );
     } catch (error: any) {
       console.error('Login error:', error);
+      
+      // Track authentication error
+      trackAuthError(
+        error.message || 'Login failed',
+        error.code || 'AUTH_ERROR'
+      );
+      
+      // Set user-friendly error messages
       if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
         setError('Invalid email or password');
       } else if (error.code === 'auth/invalid-email') {
@@ -63,11 +100,32 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      await ensureUserDocument(result.user.uid, result.user.email || '');
-      router.push('/dashboard');
+      // Measure Google login flow performance
+      await measureOperation(
+        TraderMarketTraces.LOGIN_FLOW,
+        async () => {
+          const result = await signInWithPopup(auth, googleProvider);
+          await ensureUserDocument(result.user.uid, result.user.email || '');
+          
+          // Log successful login to analytics
+          logAuthEvent('login', 'google');
+          
+          router.push('/dashboard');
+        },
+        { method: 'google' }
+      );
     } catch (error: any) {
       console.error('Google login error:', error);
+      
+      // Track authentication error (except for user cancellation)
+      if (error.code !== 'auth/popup-closed-by-user') {
+        trackAuthError(
+          error.message || 'Google login failed',
+          error.code || 'AUTH_GOOGLE_ERROR'
+        );
+      }
+      
+      // Set user-friendly error messages
       if (error.code === 'auth/popup-closed-by-user') {
         setError('Login cancelled');
       } else {

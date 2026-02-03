@@ -4,6 +4,8 @@ import "./globals.css";
 import Navigation from "./components/Navigation";
 import Footer from "./components/Footer";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { MonitoringProvider } from "@/components/MonitoringProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,11 +33,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gradient-to-br from-[#050816] via-[#0f172a] to-[#050816] text-white`}
       >
-        <AuthProvider>
-          <Navigation />
-          {children}
-          <Footer />
-        </AuthProvider>
+        <ErrorBoundary>
+          <MonitoringProvider>
+            <AuthProvider>
+              <Navigation />
+              {children}
+              <Footer />
+            </AuthProvider>
+          </MonitoringProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
