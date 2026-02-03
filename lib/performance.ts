@@ -1,15 +1,15 @@
-import { trace, Trace } from 'firebase/performance';
+import { trace, PerformanceTrace } from 'firebase/performance';
 import { performance as firebasePerformance } from './firebase';
 
 // Active traces map to prevent duplicate traces
-const activeTraces = new Map<string, Trace>();
+const activeTraces = new Map<string, PerformanceTrace>();
 
 /**
  * Start a custom trace to measure specific operations
  * @param traceName - Unique name for the trace
  * @returns The trace object or null if performance is not initialized
  */
-export const startTrace = (traceName: string): Trace | null => {
+export const startTrace = (traceName: string): PerformanceTrace | null => {
   if (!firebasePerformance) {
     console.warn('Performance monitoring not initialized');
     return null;

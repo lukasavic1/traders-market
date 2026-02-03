@@ -41,7 +41,8 @@ export const logAnalyticsEvent = (
   }
 
   try {
-    logEvent(analytics, eventName, {
+    // Firebase SDK types only include a subset of events; custom names (e.g. page_view, login) are valid at runtime
+    logEvent(analytics, eventName as Parameters<typeof logEvent>[1], {
       ...params,
       timestamp: Date.now(),
       app_name: 'Traders Market',
