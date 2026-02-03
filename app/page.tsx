@@ -607,7 +607,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                {/* Premium Bot #2: RSI Divergence */}
+                {/* Premium Bot #2: Grid */}
                 <div className={`group relative transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
                      style={{ transitionDelay: isVisible ? '400ms' : '0ms' }}>
                   <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 rounded-2xl blur-lg opacity-25 group-hover:opacity-40 transition duration-500"></div>
@@ -622,10 +622,10 @@ export default function Home() {
                     {/* Bot Header */}
                     <div className="mb-6">
                       <h3 className="text-2xl font-bold text-white mb-2">
-                        RSI Divergence
+                        Grid
                       </h3>
                       <p className="text-amber-400/90 font-medium text-sm">
-                        Momentum divergence strategy with price action confirmation and New York session control
+                        Anchored grid trading strategy with dynamic lot sizing and profit-targeted cycle management
                       </p>
                     </div>
 
@@ -641,7 +641,7 @@ export default function Home() {
                                 <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.05" />
                               </linearGradient>
                             </defs>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Cumulative Profit - RSI Divergence Strategy</text>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Cumulative Profit - Grid Strategy</text>
                             <line x1="60" y1="80" x2="60" y2="380" stroke="#374151" stroke-width="2"/>
                             <line x1="60" y1="380" x2="740" y2="380" stroke="#374151" stroke-width="2"/>
                             <text x="30" y="90" font-family="monospace" font-size="11" fill="#6b7280">$18k</text>
@@ -702,7 +702,7 @@ export default function Home() {
                           </svg>
                         `)
                       ]}
-                      altPrefix="RSI Divergence"
+                      altPrefix="Grid"
                     />
 
                     {/* Core Features */}
@@ -715,7 +715,7 @@ export default function Home() {
                           Core Concept
                         </h4>
                         <p className="text-gray-300 text-sm leading-relaxed">
-                          Trades high-probability market reversals using RSI divergence, enhanced with optional price action confirmation and strict risk management
+                          A symmetric, anchored grid strategy capturing market oscillations while keeping risk controlled via balance-based lot sizing. Unlike martingale grids, it uses a fixed lot size per cycle and closes the entire basket at a set profit target.
                         </p>
                       </div>
 
@@ -724,13 +724,10 @@ export default function Home() {
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
                           </svg>
-                          Market Logic & Signal
+                          Market Structure
                         </h4>
-                        <p className="text-gray-400 text-sm mb-2">
-                          <span className="font-medium text-gray-300">RSI Divergence Detection:</span> Detects bullish and bearish divergences by comparing price structure with RSI momentum
-                        </p>
-                        <p className="text-gray-400 text-sm">
-                          <span className="font-medium text-gray-300">Momentum Exhaustion:</span> Triggered when price makes new extreme but RSI fails to confirm it
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          The grid centers on an anchor price, with Buy Stops above and Sell Stops below. Levels expand symmetrically using a configurable pip step. Lot size is dynamically calculated from account balance and applied consistently across the cycle.
                         </p>
                       </div>
 
@@ -739,10 +736,10 @@ export default function Home() {
                           <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                             <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                           </svg>
-                          Confirmation Options
+                          Signal & Confirmation
                         </h4>
-                        <p className="text-gray-400 text-sm">
-                          Optional modes: Engulfing pattern, Pin bar pattern, ANY (either pattern), or NONE (pure RSI divergence)
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          The first grid layer is placed only when no trades are active. Additional layers are added as long as the grid remains balanced. Once combined profit hits the target, all positions close, pending orders cancel, and the grid resets.
                         </p>
                       </div>
                     </div>
@@ -752,12 +749,12 @@ export default function Home() {
                       <h4 className="text-sm font-semibold text-white mb-3">Key Highlights</h4>
                       <div className="grid grid-cols-2 gap-3">
                         {[
-                          "ATR-Based Stop Loss",
-                          "Fixed R:R or Trailing",
-                          "Auto Position Sizing",
-                          "NY Session Control",
-                          "Daily P&L Limits",
-                          "Flexible Confirmation"
+                          "Balance-Based Lot Sizing",
+                          "No Martingale Risk",
+                          "Basket Profit Target",
+                          "Anchor Price Logic",
+                          "Auto Grid Cleanup",
+                          "Symbol-Independent"
                         ].map((feature, idx) => (
                           <div key={idx} className="flex items-center gap-2">
                             <svg className="w-4 h-4 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1049,7 +1046,7 @@ export default function Home() {
                   {[
                     "EMA Crossover Strategy",
                     "RSI Overbought/Oversold",
-                    "RSI Divergence",
+                    "Grid",
                     "London Breakout",
                     "New York Session Breakout",
                   ].map((strategy, index) => (

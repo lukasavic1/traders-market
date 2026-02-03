@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import Link from 'next/link';
 
 interface Bot {
   id: string;
@@ -35,12 +34,12 @@ const demoBots: Bot[] = [
   },
   {
     id: '2',
-    name: 'RSI Divergence Master',
-    description: 'RSI divergence detection with momentum confirmation',
+    name: 'Grid',
+    description: 'Anchored grid trading strategy with dynamic lot sizing and profit-targeted cycle management',
     secretInfo: {
-      apiKey: 'TM-RSI-2024-N8L3Q5R6S',
-      downloadLink: 'https://tradersmarket.io/download/rsi-divergence-master-v1.8.ex5',
-      configuration: 'RSI Period: 14, Divergence Lookback: 50, Confirmation: Required',
+      apiKey: 'TM-GRID-2024-N8L3Q5R6S',
+      downloadLink: 'https://tradersmarket.io/download/grid-master-v1.8.ex5',
+      configuration: 'Grid Step: 20 pips, Anchor: Dynamic, Lot Sizing: Balance-Based, Profit Target: Basket Pips',
       backtestResults: 'Win Rate: 71.2%, Profit Factor: 2.8, Max Drawdown: 2.8%'
     },
     status: 'active'
@@ -216,21 +215,13 @@ export default function BotsDashboardPage() {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
-                Premium Trading Bots
-              </h1>
-              <p className="text-gray-400 text-lg">
-                Access your exclusive trading bots with secret configuration details
-              </p>
-            </div>
-            <Link
-              href="/dashboard"
-              className="px-4 py-2 rounded-lg bg-blue-600/20 border border-blue-600/30 text-blue-400 hover:bg-blue-600/30 transition-colors"
-            >
-              Back to Dashboard
-            </Link>
+          <div className="mb-4">
+            <h1 className="text-4xl font-bold text-white mb-2">
+              Premium Trading Bots
+            </h1>
+            <p className="text-gray-400 text-lg">
+              Access your exclusive trading bots with secret configuration details
+            </p>
           </div>
           
           {/* Premium Badge */}

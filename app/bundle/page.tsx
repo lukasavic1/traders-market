@@ -186,18 +186,18 @@ const bots: Bot[] = [
       "Enter long when RSI is oversold and price confirms reversal; enter short when RSI is overbought and price confirms rejection",
   },
   {
-    name: "RSI Divergence with Price Action Confirmation",
+    name: "Grid",
     icon: (
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        {/* Divergence: price up, RSI down */}
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 18l6-6 4 4 6-10" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 10l6 6 4-4 6 6" />
+        {/* Grid pattern */}
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4v16M12 4v16M16 4v16" />
       </svg>
     ),
-    indicator: "RSI vs. Price",
-    signal: "Divergence (e.g., price makes new high, RSI fails to confirm)",
-    confirmation: "Reversal candlestick pattern at divergence zone",
-    entryLogic: "Enter reversal trades when divergence aligns with price action confirmation",
+    indicator: "Anchored grid framework with dynamic base price",
+    signal: "Symmetric Buy Stop (above anchor) and Sell Stop (below anchor) placement",
+    confirmation: "Balance-based lot sizing with basket profit monitoring",
+    entryLogic: "Enter grid layers systematically around anchor price, close entire basket at combined profit target, then reset and start new cycle",
   },
   {
     name: "MACD with Price Action Confirmation",
@@ -697,7 +697,7 @@ export default function BundleInfoPage() {
                   </div>
                 </article>
 
-                {/* Premium Bot #2: RSI Divergence */}
+                {/* Premium Bot #2: Grid */}
                 <article className={`group relative overflow-hidden rounded-2xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/30 via-[#0f172a]/90 to-amber-900/20 transition-all duration-700 hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-500/20 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
                      style={{ transitionDelay: isVisible ? '180ms' : '0ms' }}>
                   <div className="absolute -inset-1 bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-600 rounded-2xl blur-lg opacity-20 group-hover:opacity-30 transition duration-500"></div>
@@ -713,10 +713,10 @@ export default function BundleInfoPage() {
                     {/* Bot Header */}
                     <div className="mb-6">
                       <h3 className="text-xl font-bold text-white mb-2">
-                        RSI Divergence
+                        Grid
                       </h3>
                       <p className="text-amber-400/90 font-medium text-sm">
-                        Momentum divergence strategy with price action confirmation and New York session control
+                        Anchored grid trading strategy with dynamic lot sizing and profit-targeted cycle management
                       </p>
                     </div>
 
@@ -732,7 +732,7 @@ export default function BundleInfoPage() {
                                 <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.05" />
                               </linearGradient>
                             </defs>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Cumulative Profit - RSI Divergence Strategy</text>
+                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Cumulative Profit - Grid Strategy</text>
                             <line x1="60" y1="80" x2="60" y2="380" stroke="#374151" stroke-width="2"/>
                             <line x1="60" y1="380" x2="740" y2="380" stroke="#374151" stroke-width="2"/>
                             <text x="30" y="90" font-family="monospace" font-size="11" fill="#6b7280">$18k</text>
@@ -793,7 +793,7 @@ export default function BundleInfoPage() {
                           </svg>
                         `)
                       ]}
-                      altPrefix="RSI Divergence"
+                      altPrefix="Grid"
                     />
 
                     {/* Core Concepts (Collapsed) */}
@@ -801,14 +801,14 @@ export default function BundleInfoPage() {
                       <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
                         <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Core Concept</p>
                         <p className="text-gray-200 text-sm leading-relaxed">
-                          Trades high-probability market reversals using RSI divergence, enhanced with optional price action confirmation and strict risk management
+                          A symmetric, anchored grid strategy designed to capture market oscillations while maintaining controlled risk through balance-based position sizing. Unlike martingale grids, this bot uses a fixed lot size per grid cycle and closes the entire basket at a predefined profit target, preventing risk escalation.
                         </p>
                       </div>
 
                       <div className="rounded-xl border border-amber-500/15 bg-black/20 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Market Logic</p>
+                        <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Market Structure</p>
                         <p className="text-gray-200 text-sm leading-relaxed">
-                          Detects bullish and bearish divergences by comparing price structure with RSI momentum over a configurable lookback period
+                          Anchored Grid Framework: The grid is built around an anchor price (midpoint) with Buy Stops placed above and Sell Stops below. Grid levels expand symmetrically using a configurable pip step, with dynamic lot sizing based on account balance.
                         </p>
                       </div>
 
@@ -816,12 +816,12 @@ export default function BundleInfoPage() {
                         <p className="text-[11px] uppercase tracking-wider text-amber-400 mb-1">Key Highlights</p>
                         <div className="grid grid-cols-2 gap-2 mt-2">
                           {[
-                            "ATR-Based Stop Loss",
-                            "Fixed R:R or Trailing",
-                            "Auto Position Sizing",
-                            "NY Session Control",
-                            "Daily P&L Limits",
-                            "Flexible Confirmation"
+                            "Balance-Based Lot Sizing",
+                            "No Martingale Risk",
+                            "Basket Profit Target",
+                            "Anchor Price Logic",
+                            "Auto Grid Cleanup",
+                            "Symbol-Independent"
                           ].map((feature, idx) => (
                             <div key={idx} className="flex items-center gap-2">
                               <svg className="w-3 h-3 text-amber-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1018,7 +1018,7 @@ export default function BundleInfoPage() {
                 href="/bundle-offer"
                 className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_34px_rgba(59,130,246,0.65)] hover:scale-[1.03] border border-blue-600/30"
               >
-                <span className="relative z-10">Buy for $159</span>
+                <span className="relative z-10">Buy for $259</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </Link>
               <div className="text-sm text-gray-400">
