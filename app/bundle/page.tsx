@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 
 // Custom hook for scroll-triggered animations
 function useScrollAnimation(options = { threshold: 0.15, rootMargin: '0px 0px -100px 0px' }) {
@@ -327,6 +329,19 @@ const bots: Bot[] = [
 
 export default function BundleInfoPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { user } = useAuth();
+  const router = useRouter();
+
+  const handleGetBundle = () => {
+    if (user?.email) {
+      // If logged in, go directly to Stripe checkout
+      const checkoutUrl = `https://www.momentumdigital.online/checkout?email=${encodeURIComponent(user.email)}`;
+      window.location.href = checkoutUrl;
+    } else {
+      // If not logged in, go to bundle-offer page (which will prompt login)
+      router.push('/bundle-offer');
+    }
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050816] via-[#0f172a] via-[#0f1f4a] to-[#050816]">
@@ -1282,13 +1297,13 @@ export default function BundleInfoPage() {
 
                   <div className={`mt-10 flex flex-col gap-4 sm:flex-row sm:items-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                        style={{ transitionDelay: isVisible ? '400ms' : '0ms' }}>
-                    <Link
-                      href="/bundle-offer"
+                    <button
+                      onClick={handleGetBundle}
                       className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_34px_rgba(59,130,246,0.65)] hover:scale-[1.03] border border-blue-600/30"
                     >
                       <span className="relative z-10">Get the Bundle</span>
                       <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    </Link>
+                    </button>
 
                     <div className="text-sm text-gray-400">
                       Secure checkout. Instant access.
