@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
     archive.finalize();
     const zipBuffer = await zipPromise;
 
-    return new NextResponse(zipBuffer, {
+    return new NextResponse(new Uint8Array(zipBuffer), {
       headers: {
         'Content-Type': 'application/zip',
         'Content-Disposition': 'attachment; filename="ea-bots-ex5.zip"',
