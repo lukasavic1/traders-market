@@ -5,145 +5,60 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { db } from '@/lib/firebase';
 import { doc, getDoc } from 'firebase/firestore';
-import { logAnalyticsEvent, logBotEvent } from '@/lib/analytics';
+import { logAnalyticsEvent } from '@/lib/analytics';
 import { measureOperation, TraderMarketTraces } from '@/lib/performance';
 import { trackFirestoreError } from '@/lib/errorTracking';
 import { useRenderPerformance } from '@/hooks/usePerformance';
 
-interface Bot {
-  id: string;
-  name: string;
-  description: string;
-  secretInfo: {
-    apiKey: string;
-    downloadLink: string;
-    configuration: string;
-    backtestResults: string;
-  };
-  status: 'active' | 'inactive';
-}
-
-const demoBots: Bot[] = [
+// Premium bots (gold styling, shown first)
+const PREMIUM_BOTS = [
   {
-    id: '1',
-    name: 'EMA Crossover Pro',
-    description: 'Advanced EMA crossover strategy with price action confirmation',
-    secretInfo: {
-      apiKey: 'TM-EMA-2024-X7K9M2P4L',
-      downloadLink: 'https://tradersmarket.io/download/ema-crossover-pro-v2.1.ex5',
-      configuration: 'Fast EMA: 12, Slow EMA: 26, Confirmation: Price Action Required',
-      backtestResults: 'Win Rate: 68.5%, Profit Factor: 2.3, Max Drawdown: 3.2%'
-    },
-    status: 'active'
+    name: 'NewYork–London Breakout',
+    tagline: 'Session-based breakout strategy with ATR risk control and smart trade management',
+    coreConcept: 'Trades high-probability breakouts from the London and New York pre-session ranges, targeting strong liquidity-driven moves at session open',
+    marketStructure: 'Session Range (Breakout Box): High and Low calculated from predefined time window before session open, using M1 price data for precise range detection',
+    keyHighlights: ['ATR-Based Stop Loss', 'Fixed R:R Take Profit', 'Auto Position Sizing', 'Built-in Trailing Stop', 'Daily P&L Limits', 'Session Control'],
   },
   {
-    id: '2',
     name: 'Grid',
-    description: 'Anchored grid trading strategy with dynamic lot sizing and profit-targeted cycle management',
-    secretInfo: {
-      apiKey: 'TM-GRID-2024-N8L3Q5R6S',
-      downloadLink: 'https://tradersmarket.io/download/grid-master-v1.8.ex5',
-      configuration: 'Grid Step: 20 pips, Anchor: Dynamic, Lot Sizing: Balance-Based, Profit Target: Basket Pips',
-      backtestResults: 'Win Rate: 71.2%, Profit Factor: 2.8, Max Drawdown: 2.8%'
-    },
-    status: 'active'
+    tagline: 'Anchored grid trading strategy with dynamic lot sizing and profit-targeted cycle management',
+    coreConcept: 'A symmetric, anchored grid strategy designed to capture market oscillations while maintaining controlled risk through balance-based position sizing. Unlike martingale grids, this bot uses a fixed lot size per grid cycle and closes the entire basket at a predefined profit target, preventing risk escalation.',
+    marketStructure: 'Anchored Grid Framework: The grid is built around an anchor price (midpoint) with Buy Stops placed above and Sell Stops below. Grid levels expand symmetrically using a configurable pip step, with dynamic lot sizing based on account balance.',
+    keyHighlights: ['Balance-Based Lot Sizing', 'No Martingale Risk', 'Basket Profit Target', 'Anchor Price Logic', 'Auto Grid Cleanup', 'Symbol-Independent'],
   },
-  {
-    id: '3',
-    name: 'MACD Momentum Trader',
-    description: 'MACD-based momentum trading with trend confirmation',
-    secretInfo: {
-      apiKey: 'TM-MACD-2024-P9M4R7T8U',
-      downloadLink: 'https://tradersmarket.io/download/macd-momentum-trader-v2.3.ex5',
-      configuration: 'Fast EMA: 12, Slow EMA: 26, Signal: 9, Trend Filter: Enabled',
-      backtestResults: 'Win Rate: 65.8%, Profit Factor: 2.1, Max Drawdown: 4.1%'
-    },
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Heiken Ashi Trend Follower',
-    description: 'Heiken Ashi candle analysis with trend following logic',
-    secretInfo: {
-      apiKey: 'TM-HA-2024-Q0N5S9V1W',
-      downloadLink: 'https://tradersmarket.io/download/heiken-ashi-trend-v1.5.ex5',
-      configuration: 'Trend Detection: 3 Candles, Confirmation: Standard Candles',
-      backtestResults: 'Win Rate: 63.4%, Profit Factor: 1.9, Max Drawdown: 5.2%'
-    },
-    status: 'active'
-  },
-  {
-    id: '5',
-    name: 'Inside Bar Breakout Pro',
-    description: 'Inside bar pattern detection with breakout confirmation',
-    secretInfo: {
-      apiKey: 'TM-IB-2024-R1O6T0X2Y',
-      downloadLink: 'https://tradersmarket.io/download/inside-bar-breakout-pro-v2.0.ex5',
-      configuration: 'Breakout Multiplier: 1.5x ATR, Confirmation: Volume Required',
-      backtestResults: 'Win Rate: 69.1%, Profit Factor: 2.4, Max Drawdown: 3.8%'
-    },
-    status: 'active'
-  },
-  {
-    id: '6',
-    name: 'Stochastics Reversal Expert',
-    description: 'Stochastic oscillator reversal trading system',
-    secretInfo: {
-      apiKey: 'TM-STOCH-2024-S2P7U1Y3Z',
-      downloadLink: 'https://tradersmarket.io/download/stochastics-reversal-v1.7.ex5',
-      configuration: 'K Period: 14, D Period: 3, Overbought: 80, Oversold: 20',
-      backtestResults: 'Win Rate: 66.7%, Profit Factor: 2.0, Max Drawdown: 4.5%'
-    },
-    status: 'active'
-  },
-  {
-    id: '7',
-    name: 'Bollinger Bands Scalper',
-    description: 'Bollinger Bands mean reversion and breakout strategy',
-    secretInfo: {
-      apiKey: 'TM-BB-2024-T3Q8V2Z4A',
-      downloadLink: 'https://tradersmarket.io/download/bollinger-bands-scalper-v1.9.ex5',
-      configuration: 'Period: 20, Deviation: 2.0, Mean Reversion: Enabled',
-      backtestResults: 'Win Rate: 64.2%, Profit Factor: 1.8, Max Drawdown: 5.8%'
-    },
-    status: 'active'
-  },
-  {
-    id: '8',
-    name: 'Fibonacci Retracement Pro',
-    description: 'Fibonacci retracement level trading with impulse detection',
-    secretInfo: {
-      apiKey: 'TM-FIB-2024-U4R9W3A5B',
-      downloadLink: 'https://tradersmarket.io/download/fibonacci-retracement-pro-v2.2.ex5',
-      configuration: 'Retracement Levels: 38.2%, 50%, 61.8%, Impulse Filter: ATR x 2',
-      backtestResults: 'Win Rate: 67.3%, Profit Factor: 2.2, Max Drawdown: 4.0%'
-    },
-    status: 'active'
-  },
-  {
-    id: '9',
-    name: 'Daily Range Breakout',
-    description: 'Daily range breakout strategy with ATR-based stops',
-    secretInfo: {
-      apiKey: 'TM-DRB-2024-V5S0X4B6C',
-      downloadLink: 'https://tradersmarket.io/download/daily-range-breakout-v1.6.ex5',
-      configuration: 'Range Period: Daily, Breakout Confirmation: ATR x 1.5',
-      backtestResults: 'Win Rate: 70.5%, Profit Factor: 2.5, Max Drawdown: 3.5%'
-    },
-    status: 'active'
-  },
-  {
-    id: '10',
-    name: 'NewYork-London Breakout Premium',
-    description: 'Session-based breakout with institutional-grade logic',
-    secretInfo: {
-      apiKey: 'TM-NYLD-2024-PREMIUM-W6T1Y5C7D',
-      downloadLink: 'https://tradersmarket.io/download/ny-london-breakout-premium-v3.0.ex5',
-      configuration: 'Session Range: Pre-NY & Pre-London, ATR Stop: 2.0x, R:R: 1:3',
-      backtestResults: 'Win Rate: 68.5%, Profit Factor: 2.3, Max Drawdown: 3.2%'
-    },
-    status: 'active'
-  }
+];
+
+// Bot name → Supabase Storage .ex5 filename (ea-bots bucket)
+const BOT_NAME_TO_FILE: Record<string, string> = {
+  'NewYork–London Breakout': 'NY-London Breakout.ex5',
+  'Grid': 'grid_strategy.ex5',
+  'EMA Crossover with Price Action Confirmation': 'SMA.ex5',
+  'RSI Overbought/Oversold with Price Action Confirmation': 'RSI.ex5',
+  'MACD with Price Action Confirmation': 'MACD.ex5',
+  'Heiken Ashi with Price Action Confirmation': 'HeikinAshi.ex5',
+  'Inside Bar Breakout': 'InsideBarBreakout.ex5',
+  'Stochastics with Price Action Confirmation': 'Stochastic.ex5',
+  'Bollinger Bands with Price Action Confirmation': 'BB.ex5',
+  'Fibonacci Retracement': 'FibonacciDailyRetrace.ex5',
+  'Daily Range Breakout': 'DailyBreakoutATR.ex5',
+  'Pivot Point with Price Action Confirmation': 'PivotPoint.ex5',
+  'RSI Divergence with Price Action Confirmation': 'DivergenceRSI.ex5',
+};
+
+// Standard strategy bots (from bundle)
+type StrategyBot = { name: string; description?: string; indicator: string; signal: string; confirmation: string; entryLogic: string };
+const STRATEGY_BOTS: StrategyBot[] = [
+  { name: 'EMA Crossover with Price Action Confirmation', indicator: 'Fast EMA vs. Slow EMA', signal: 'Fast EMA crossing above (bullish) or below (bearish) the slow EMA', confirmation: 'Price action in the crossover direction (e.g., breakout candle)', entryLogic: 'Enter long on bullish cross with confirmation; enter short on bearish cross with confirmation' },
+  { name: 'RSI Overbought/Oversold with Price Action Confirmation', indicator: 'RSI', signal: 'RSI enters overbought or oversold territory', confirmation: 'Reversal candlestick pattern or rejection from a key level', entryLogic: 'Enter long when RSI is oversold and price confirms reversal; enter short when RSI is overbought and price confirms rejection' },
+  { name: 'MACD with Price Action Confirmation', indicator: 'MACD line cross and histogram momentum', signal: 'MACD crossover or divergence in trend direction', confirmation: 'Price action supports the MACD signal (e.g., breakout, rejection)', entryLogic: 'Enter long on bullish MACD signals with confirmation; enter short on bearish signals with confirmation' },
+  { name: 'Heiken Ashi with Price Action Confirmation', indicator: 'Heiken Ashi candles', signal: 'Color change signaling potential trend reversal or continuation', confirmation: 'Standard candlestick price action in the same direction', entryLogic: 'Enter trades in the direction of the Heiken Ashi shift when supported by candlestick confirmation' },
+  { name: 'Inside Bar Breakout', indicator: 'Inside bar formation (candle fully inside the previous one)', signal: 'Price breaks above or below the inside bar range', confirmation: 'Breakout candle larger than ATR × X', entryLogic: 'Enter in breakout direction after confirmation, capturing momentum from consolidation' },
+  { name: 'Stochastics with Price Action Confirmation', indicator: 'Stochastic oscillator', signal: 'Stochastics enters overbought/oversold and signals reversal', confirmation: 'Reversal candlestick or rejection pattern', entryLogic: 'Enter long on oversold reversals with confirmation; enter short on overbought reversals with confirmation' },
+  { name: 'Bollinger Bands with Price Action Confirmation', indicator: 'Bollinger Bands', signal: 'Price touches or breaks the upper or lower band', confirmation: 'Reversal or breakout candlestick pattern', entryLogic: 'Enter reversal trades from overextended levels or continuation trades on confirmed breakouts' },
+  { name: 'Fibonacci Retracement', indicator: 'Fibonacci retracement levels (commonly 35–50%)', signal: 'Strong daily impulse candle above ATR × X, followed by pullback into retracement zone', confirmation: 'Rejection candlestick pattern inside the retracement zone', entryLogic: 'Enter in direction of the original impulse once pullback confirms continuation' },
+  { name: 'Daily Range Breakout', indicator: "Previous day's high and low", signal: 'Price breaks the daily high (bullish) or low (bearish)', confirmation: 'Breakout candle larger than ATR × X', entryLogic: 'Enter in breakout direction, using ATR-based stop-loss and take-profit for risk/reward consistency' },
+  { name: 'Pivot Point with Price Action Confirmation', description: 'Level-based trading logic using pivot points for precise entries.', indicator: 'Daily Pivot Points (Classic), R1–R3, S1–S3', signal: 'Price approaches pivot, support, or resistance levels', confirmation: 'Candlestick patterns (Engulfing or Pin Bar) near pivot levels', entryLogic: 'Enter trades when price is near a pivot level and a bullish or bearish candlestick pattern confirms the direction. Optionally supports ATR-based stop loss, trailing stops, and risk management for daily profit/loss limits.' },
+  { name: 'RSI Divergence with Price Action Confirmation', description: 'Momentum-based logic detecting divergences for trend reversals.', indicator: 'Relative Strength Index (RSI)', signal: 'Bullish or bearish RSI divergence', confirmation: 'Candlestick patterns (Engulfing or Pin Bar) aligned with divergence signals', entryLogic: 'Enter trades when RSI divergence occurs. If confirmation is enabled, require supporting bullish/bearish candlestick patterns. Supports ATR-based stop loss, trailing stops, and configurable risk per trade and daily limits.' },
 ];
 
 export default function BotsDashboardPage() {
@@ -154,7 +69,10 @@ export default function BotsDashboardPage() {
   const router = useRouter();
   const [hasPaid, setHasPaid] = useState<boolean>(false);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
-  const [expandedBot, setExpandedBot] = useState<string | null>(null);
+  const [expandedStrategyIndex, setExpandedStrategyIndex] = useState<number | null>(null);
+  const [downloadingAll, setDownloadingAll] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const [downloadingFileName, setDownloadingFileName] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -232,153 +150,273 @@ export default function BotsDashboardPage() {
     );
   }
 
+  async function downloadAll() {
+    setDownloadingAll(true);
+    setDownloadError(null);
+    try {
+      const res = await fetch('/api/download-ex5');
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'ea-bots-ex5.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setDownloadError(e instanceof Error ? e.message : 'Download failed');
+    } finally {
+      setDownloadingAll(false);
+    }
+  }
+
+  async function downloadOne(filename: string) {
+    if (downloadingFileName || downloadingAll) return;
+    setDownloadingFileName(filename);
+    setDownloadError(null);
+    try {
+      const res = await fetch(`/api/download-ex5?name=${encodeURIComponent(filename)}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      setDownloadError(e instanceof Error ? e.message : 'Download failed');
+    } finally {
+      setDownloadingFileName(null);
+    }
+  }
+
   if (!user || !hasPaid) {
     return null;
   }
 
   return (
     <main className="min-h-screen px-4 py-12">
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-5xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <div className="mb-4">
-            <h1 className="text-4xl font-bold text-white mb-2">
-              Premium Trading Bots
+        <div className="mb-10">
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <h1 className="text-4xl font-bold text-white">
+              Trading Bots Library
             </h1>
-            <p className="text-gray-400 text-lg">
-              Access your exclusive trading bots with secret configuration details
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-600/20 border border-green-500/40">
+              <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-sm font-bold text-green-300 uppercase tracking-wider">Premium Access Active</span>
+            </div>
+            <button
+              type="button"
+              onClick={downloadAll}
+              disabled={downloadingAll}
+              className="inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-xl border border-blue-500/40 bg-gradient-to-r from-blue-600/90 to-indigo-600/90 text-sm font-semibold text-white shadow-lg shadow-blue-900/25 transition-all duration-200 hover:from-blue-500 hover:to-indigo-500 hover:border-blue-400/60 hover:shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:from-blue-600/90 disabled:to-indigo-600/90"
+              aria-busy={downloadingAll}
+            >
+              {downloadingAll ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/80 border-t-transparent rounded-full animate-spin" aria-hidden />
+                  Preparing…
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Download All
+                </>
+              )}
+            </button>
+          </div>
+          {downloadError && (
+            <p className="mb-4 text-sm text-red-400" role="alert">
+              {downloadError}
             </p>
-          </div>
-          
-          {/* Premium Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-green-500/20 to-emerald-600/20 border-2 border-green-500/40">
-            <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse"></div>
-            <span className="text-sm font-bold text-green-300 uppercase tracking-wider">Premium Access Active</span>
-          </div>
-        </div>
+          )}
 
-        {/* Bots Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {demoBots.map((bot) => {
-            const isExpanded = expandedBot === bot.id;
-            return (
-              <div
-                key={bot.id}
-                className={`group relative overflow-hidden rounded-2xl border transition-all duration-300 ${
-                  isExpanded
-                    ? 'border-blue-500/60 bg-gradient-to-br from-blue-950/55 via-[#0f1f4a]/45 to-blue-900/40 shadow-2xl shadow-blue-900/25'
-                    : 'border-blue-600/25 bg-gradient-to-br from-blue-950/30 via-[#0f1f4a]/20 to-blue-900/20 hover:border-blue-500/45 hover:shadow-xl hover:shadow-blue-900/15'
-                }`}
-              >
-                {/* Ambient glow */}
-                <div
-                  className={`pointer-events-none absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 opacity-0 blur-xl transition-opacity duration-300 ${
-                    isExpanded ? 'opacity-20' : 'group-hover:opacity-10'
-                  }`}
-                />
-
-                <div className="relative p-6">
-                  {/* Bot Header */}
-                  <div className="mb-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="text-xl font-bold text-white">{bot.name}</h3>
-                      <div className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                        bot.status === 'active'
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                          : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                      }`}>
-                        {bot.status === 'active' ? 'Active' : 'Inactive'}
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-400">{bot.description}</p>
-                  </div>
-
-                  {/* Secret Info - Only visible when expanded */}
-                  {isExpanded && (
-                    <div className="mt-4 space-y-3 animate-fade-in">
-                      <div className="rounded-xl border border-blue-600/15 bg-black/30 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wider text-blue-300/80 mb-1">API Key</p>
-                        <p className="text-gray-200 text-sm font-mono break-all">{bot.secretInfo.apiKey}</p>
-                      </div>
-
-                      <div className="rounded-xl border border-blue-600/15 bg-black/30 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wider text-blue-300/80 mb-1">Download Link</p>
-                        <a
-                          href={bot.secretInfo.downloadLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-400 hover:text-blue-300 text-sm break-all underline"
-                        >
-                          {bot.secretInfo.downloadLink}
-                        </a>
-                      </div>
-
-                      <div className="rounded-xl border border-blue-600/15 bg-black/30 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wider text-blue-300/80 mb-1">Configuration</p>
-                        <p className="text-gray-200 text-sm">{bot.secretInfo.configuration}</p>
-                      </div>
-
-                      <div className="rounded-xl border border-green-600/15 bg-green-500/10 px-4 py-3">
-                        <p className="text-[11px] uppercase tracking-wider text-green-300/80 mb-1">Backtest Results</p>
-                        <p className="text-gray-200 text-sm">{bot.secretInfo.backtestResults}</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Expand/Collapse Button */}
-                  <button
-                    onClick={() => {
-                      const willExpand = !isExpanded;
-                      setExpandedBot(willExpand ? bot.id : null);
-                      
-                      // Track bot interaction
-                      if (willExpand) {
-                        logBotEvent('bot_secret_reveal', bot.id, bot.name);
-                      }
-                    }}
-                    className={`mt-4 w-full rounded-xl border border-blue-600/15 bg-black/10 px-4 py-3 text-sm font-semibold transition-all duration-300 ${
-                      isExpanded
-                        ? 'text-blue-200 hover:text-white hover:border-blue-500/30'
-                        : 'text-blue-300 hover:text-white hover:border-blue-500/30'
-                    } hover:bg-black/20 hover:shadow-[0_0_18px_rgba(59,130,246,0.35)]`}
-                  >
-                    <span className="flex items-center justify-center gap-2">
-                      <span>{isExpanded ? 'Hide Secret Info' : 'Show Secret Info'}</span>
-                      <svg
-                        className={`h-4 w-4 transition-transform duration-300 ${
-                          isExpanded ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </span>
-                  </button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Info Banner */}
-        <div className="mt-8 rounded-xl border border-blue-600/30 bg-gradient-to-br from-blue-950/40 to-blue-900/30 p-6">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-blue-600/20 flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {/* Info module - clean, minimal */}
+          <section
+            className="flex gap-4 rounded-lg border border-slate-600/40 bg-slate-800/30 px-5 py-4"
+            aria-label="About this dashboard"
+          >
+            <div className="flex-shrink-0 mt-0.5 text-slate-500">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-white mb-2">Demo Mode</h3>
-              <p className="text-gray-300 text-sm">
-                This is a demo page for payment implementation. The API keys, download links, and configuration details shown here are placeholder data. 
-                Once payment is integrated, these will be replaced with real bot access credentials.
+              <p className="text-slate-300 text-sm leading-relaxed">
+                This page contains all available trading bots. You can browse, download, and manage your bots from here in one place. Premium bots are clearly highlighted with gold styling and appear first in the list for easy access.
               </p>
             </div>
-          </div>
+          </section>
         </div>
+
+        {/* Premium Bots - gold styling, first */}
+        <section className="mb-12">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-amber-400 font-semibold text-sm uppercase tracking-wide">Premium</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-amber-500/40 to-transparent" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {PREMIUM_BOTS.map((bot) => (
+              <article
+                key={bot.name}
+                className="relative overflow-hidden rounded-xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/25 via-slate-900/80 to-amber-900/20 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300"
+              >
+                <div className="absolute top-4 right-4">
+                  <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                    Premium
+                  </span>
+                </div>
+                <div className="p-6">
+                  <div className="flex items-center gap-2 mb-1 pr-20">
+                    <h3 className="text-lg font-bold text-white">{bot.name}</h3>
+                    {BOT_NAME_TO_FILE[bot.name] && (
+                      <button
+                        type="button"
+                        onClick={() => downloadOne(BOT_NAME_TO_FILE[bot.name]!)}
+                        disabled={downloadingFileName !== null}
+                        title={`Download ${BOT_NAME_TO_FILE[bot.name]}`}
+                        className="shrink-0 p-1.5 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400 transition-all duration-200 hover:bg-amber-500/20 hover:border-amber-500/50 hover:text-amber-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                        aria-label={`Download ${bot.name}`}
+                      >
+                        {downloadingFileName === BOT_NAME_TO_FILE[bot.name] ? (
+                          <span className="w-4 h-4 block border-2 border-amber-400 border-t-transparent rounded-full animate-spin" aria-hidden />
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                          </svg>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                  <p className="text-amber-400/90 text-sm font-medium mb-4">{bot.tagline}</p>
+                  <div className="space-y-3">
+                    <div className="rounded-lg border border-amber-500/15 bg-black/20 px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wider text-amber-400/90 mb-1">Core Concept</p>
+                      <p className="text-slate-300 text-sm leading-relaxed">{bot.coreConcept}</p>
+                    </div>
+                    <div className="rounded-lg border border-amber-500/15 bg-black/20 px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wider text-amber-400/90 mb-1">Market Structure</p>
+                      <p className="text-slate-300 text-sm leading-relaxed">{bot.marketStructure}</p>
+                    </div>
+                    <div className="rounded-lg border border-amber-500/15 bg-black/20 px-4 py-3">
+                      <p className="text-[11px] uppercase tracking-wider text-amber-400/90 mb-2">Key Highlights</p>
+                      <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-slate-300 text-xs">
+                        {bot.keyHighlights.map((item) => (
+                          <li key={item} className="flex items-center gap-2">
+                            <span className="text-amber-400 shrink-0">✓</span>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* Standard Bots - blue-accented card styling */}
+        <section>
+          <div className="flex items-center gap-3 mb-8">
+            <span className="text-blue-300 font-semibold text-sm uppercase tracking-widest">Standard</span>
+            <span className="h-px flex-1 bg-gradient-to-r from-blue-500/50 via-blue-600/30 to-transparent" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {STRATEGY_BOTS.map((bot, index) => {
+              const isOpen = expandedStrategyIndex === index;
+              return (
+                <article
+                  key={`${bot.name}-${index}`}
+                  className="group relative rounded-2xl border border-blue-900/50 bg-gradient-to-br from-slate-800/60 via-slate-800/50 to-blue-950/20 shadow-xl shadow-slate-950/50 overflow-hidden transition-all duration-300 hover:border-blue-600/50 hover:shadow-2xl hover:shadow-blue-950/30 hover:from-slate-800/70 hover:to-blue-950/30"
+                >
+                  {/* Top accent line - blue */}
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500/70 to-transparent opacity-90" />
+                  <div className="p-6">
+                    {/* Header: title + download */}
+                    <div className="flex items-start gap-3">
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-base font-semibold text-white leading-snug tracking-tight">
+                          {bot.name}
+                        </h3>
+                        <p className="mt-2 text-sm text-slate-400 leading-relaxed">
+                          {bot.description ?? 'Indicator-driven logic with confirmation for higher-quality entries.'}
+                        </p>
+                      </div>
+                      {BOT_NAME_TO_FILE[bot.name] && (
+                        <button
+                          type="button"
+                          onClick={() => downloadOne(BOT_NAME_TO_FILE[bot.name]!)}
+                          disabled={downloadingFileName !== null}
+                          title={`Download ${BOT_NAME_TO_FILE[bot.name]}`}
+                          className="shrink-0 p-2 rounded-xl border border-blue-700/40 bg-blue-950/30 text-blue-400 transition-all duration-200 hover:bg-blue-800/40 hover:border-blue-500/50 hover:text-blue-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                          aria-label={`Download ${bot.name}`}
+                        >
+                          {downloadingFileName === BOT_NAME_TO_FILE[bot.name] ? (
+                            <span className="w-4 h-4 block border-2 border-blue-400 border-t-transparent rounded-full animate-spin" aria-hidden />
+                          ) : (
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                          )}
+                        </button>
+                      )}
+                    </div>
+                    {/* Expandable strategy details */}
+                    <div className={`grid transition-all duration-300 ease-out ${isOpen ? 'grid-rows-[1fr] opacity-100 mt-6' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+                      <div className="overflow-hidden">
+                        <div className="space-y-4 pt-1">
+                          {[
+                            { label: 'Indicator', value: bot.indicator },
+                            { label: 'Signal', value: bot.signal },
+                            { label: 'Confirmation', value: bot.confirmation },
+                            { label: 'Entry Logic', value: bot.entryLogic },
+                          ].map(({ label, value }) => (
+                            <div
+                              key={label}
+                              className="rounded-xl border border-blue-900/40 bg-blue-950/20 px-4 py-3.5 backdrop-blur-sm"
+                            >
+                              <p className="text-[11px] font-medium uppercase tracking-wider text-blue-400/90 mb-2">
+                                {label}
+                              </p>
+                              <p className="text-slate-300 text-sm leading-relaxed">{value}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setExpandedStrategyIndex(isOpen ? null : index)}
+                      className="mt-5 w-full rounded-xl border border-blue-700/40 bg-blue-950/30 px-4 py-3 text-sm font-medium text-blue-200/90 transition-all duration-200 hover:bg-blue-800/40 hover:text-blue-100 hover:border-blue-500/50 flex items-center justify-center gap-2"
+                      aria-expanded={isOpen}
+                    >
+                      {isOpen ? 'Show less' : 'Read more'}
+                      <svg className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </main>
   );

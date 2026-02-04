@@ -186,20 +186,6 @@ const bots: Bot[] = [
       "Enter long when RSI is oversold and price confirms reversal; enter short when RSI is overbought and price confirms rejection",
   },
   {
-    name: "Grid",
-    icon: (
-      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        {/* Grid pattern */}
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4v16M12 4v16M16 4v16" />
-      </svg>
-    ),
-    indicator: "Anchored grid framework with dynamic base price",
-    signal: "Symmetric Buy Stop (above anchor) and Sell Stop (below anchor) placement",
-    confirmation: "Balance-based lot sizing with basket profit monitoring",
-    entryLogic: "Enter grid layers systematically around anchor price, close entire basket at combined profit target, then reset and start new cycle",
-  },
-  {
     name: "MACD with Price Action Confirmation",
     icon: (
       <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -308,6 +294,34 @@ const bots: Bot[] = [
     confirmation: "Breakout candle larger than ATR × X",
     entryLogic:
       "Enter in breakout direction, using ATR-based stop-loss and take-profit for risk/reward consistency",
+  },
+  {
+    name: "Pivot Point with Price Action Confirmation",
+    icon: (
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h8" />
+      </svg>
+    ),
+    indicator: "Daily Pivot Points (Classic), R1–R3, S1–S3",
+    signal: "Price approaches pivot, support, or resistance levels",
+    confirmation: "Candlestick patterns (Engulfing or Pin Bar) near pivot levels",
+    entryLogic:
+      "Enter trades when price is near a pivot level and a bullish or bearish candlestick pattern confirms the direction. Optionally supports ATR-based stop loss, trailing stops, and risk management for daily profit/loss limits.",
+  },
+  {
+    name: "RSI Divergence with Price Action Confirmation",
+    icon: (
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7h16M4 17h16" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 14l3-6 3 4 3-8" />
+      </svg>
+    ),
+    indicator: "Relative Strength Index (RSI)",
+    signal: "Bullish or bearish RSI divergence",
+    confirmation: "Candlestick patterns (Engulfing or Pin Bar) aligned with divergence signals",
+    entryLogic:
+      "Enter trades when RSI divergence occurs. If confirmation is enabled, require supporting bullish/bearish candlestick patterns. Supports ATR-based stop loss, trailing stops, and configurable risk per trade and daily limits.",
   },
 ];
 

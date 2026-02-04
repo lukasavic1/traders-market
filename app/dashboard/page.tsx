@@ -169,7 +169,7 @@ function DashboardContent() {
                               // Double-check payment status before navigating
                               if (!hasPaid && user?.email) {
                                 e.preventDefault();
-                                const checkoutUrl = `http://localhost:3001/checkout?email=${encodeURIComponent(user.email)}`;
+                                const checkoutUrl = `https://www.momentumdigital.online/checkout?email=${encodeURIComponent(user.email)}`;
                                 window.location.href = checkoutUrl;
                               }
                             }}
@@ -187,7 +187,7 @@ function DashboardContent() {
                       ) : (
                         <>
                           <a
-                            href={user?.email ? `http://localhost:3001/checkout?email=${encodeURIComponent(user.email)}` : 'http://localhost:3001/checkout'}
+                            href={user?.email ? `https://www.momentumdigital.online/checkout?email=${encodeURIComponent(user.email)}` : 'https://www.momentumdigital.online/checkout'}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full py-4 px-8 rounded-xl text-white text-lg font-bold transition-all duration-300 flex items-center justify-center gap-3 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-600 hover:from-blue-500 hover:via-blue-600 hover:to-blue-500 hover:shadow-2xl hover:shadow-blue-600/50 hover:scale-[1.02] active:scale-[0.98]"
