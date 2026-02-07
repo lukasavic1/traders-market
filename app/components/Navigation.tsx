@@ -53,7 +53,11 @@ export default function Navigation() {
     <nav className="sticky top-0 w-full border-b border-blue-900/40 bg-gradient-to-r from-[#050816] via-[#0f172a] to-[#050816] backdrop-blur-sm z-[1000]">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
         {/* Logo */}
+<<<<<<< HEAD
         <Link href="/" className="flex items-center" onClick={(e) => handleNavLinkClick(e, "/")}>
+=======
+        <Link href={user ? dashboardHref : "/"} className="flex items-center">
+>>>>>>> 9e9836abfce9ab23d3537e064c25478309026951
           <Image
             src="/tradersmarket-logo.png"
             alt="TradersMarket.io"
@@ -67,6 +71,7 @@ export default function Navigation() {
 
         {/* Desktop Navigation */}
         <div className="hidden items-center space-x-8 md:flex">
+<<<<<<< HEAD
           <Link
             href="/"
             className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
@@ -88,6 +93,31 @@ export default function Navigation() {
           >
             Blogs
           </Link>
+=======
+          {/* Only show public navigation links when user is NOT logged in */}
+          {!user && (
+            <>
+              <Link
+                href="/"
+                className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+              >
+                Home
+              </Link>
+              <Link
+                href="/bundle"
+                className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+              >
+                Bundle Offer
+              </Link>
+              <Link
+                href="/blogs"
+                className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+              >
+                Blogs
+              </Link>
+            </>
+          )}
+>>>>>>> 9e9836abfce9ab23d3537e064c25478309026951
 
           {/* Auth Buttons - Desktop */}
           {!loading && (
@@ -202,6 +232,7 @@ export default function Navigation() {
       {/* Mobile Menu */}
         <div className={`${isMobileMenuOpen ? "block" : "hidden"} border-t border-blue-900/30 md:hidden`}>
         <div className="flex flex-col space-y-4 px-4 py-4">
+<<<<<<< HEAD
           <Link
             href="/"
             className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
@@ -223,6 +254,34 @@ export default function Navigation() {
           >
             Blogs
           </Link>
+=======
+          {/* Only show public navigation links when user is NOT logged in */}
+          {!user && (
+            <>
+              <Link
+                href="/"
+                className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link
+                href="/bundle"
+                className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Bundle Offer
+              </Link>
+              <Link
+                href="/blogs"
+                className="text-sm font-medium text-white transition-colors hover:text-blue-400 hover:drop-shadow-[0_0_8px_rgba(59,130,246,0.7)]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Blogs
+              </Link>
+            </>
+          )}
+>>>>>>> 9e9836abfce9ab23d3537e064c25478309026951
 
           {/* Auth Buttons - Mobile */}
           {!loading && (

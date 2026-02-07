@@ -10,8 +10,8 @@ export default function BundleOffer() {
 
   const handlePurchase = () => {
     if (user?.email) {
-      const checkoutUrl = `https://www.momentumdigital.online/checkout?email=${encodeURIComponent(user.email)}`;
-      window.location.href = checkoutUrl;
+      // Redirect to dashboard/bots if logged in
+      router.push('/dashboard/bots');
     } else {
       // Redirect to login if not authenticated
       router.push('/login?redirect=/bundle-offer');

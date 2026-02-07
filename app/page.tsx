@@ -2,7 +2,12 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+<<<<<<< HEAD
 import { ImageLightboxModal } from "./components/ImageLightboxModal";
+=======
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+>>>>>>> 9e9836abfce9ab23d3537e064c25478309026951
 
 // Custom hook for scroll-triggered animations
 function useScrollAnimation(options = { threshold: 0.15, rootMargin: '0px 0px -100px 0px' }) {
@@ -166,11 +171,33 @@ function ImageCarousel({ images, altPrefix, currencyLabel, strategyName }: { ima
 export default function Home() {
   const [sectionRef, isVisible] = useScrollAnimation();
   const [heroAnimated, setHeroAnimated] = useState(false);
+  const { user, loading, hasActiveSubscription } = useAuth();
+  const router = useRouter();
 
   useEffect(() => {
-    // Trigger hero animation once on mount
-    setHeroAnimated(true);
-  }, []);
+    // Redirect logged-in users to dashboard
+    if (!loading && user) {
+      const dashboardPath = hasActiveSubscription ? "/dashboard/bots" : "/dashboard";
+      router.replace(dashboardPath);
+      return;
+    }
+    // Trigger hero animation once on mount (only if not logged in)
+    if (!user) {
+      setHeroAnimated(true);
+    }
+  }, [user, loading, hasActiveSubscription, router]);
+
+  // Show loading state while checking auth or redirecting
+  if (loading || user) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen">
