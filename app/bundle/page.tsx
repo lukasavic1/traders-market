@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
-<<<<<<< HEAD
 import { ImageLightboxModal } from "../components/ImageLightboxModal";
-=======
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
->>>>>>> 9e9836abfce9ab23d3537e064c25478309026951
 
 // Custom hook for scroll-triggered animations
 function useScrollAnimation(options = { threshold: 0.15, rootMargin: '0px 0px -100px 0px' }) {

@@ -4,18 +4,28 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 
+const CHECKOUT_BASE = "https://www.momentumdigital.online/checkout";
+
 export default function BundleOffer() {
-  const { user } = useAuth();
+  const { user, hasActiveSubscription } = useAuth();
   const router = useRouter();
 
+  const hasPaid = hasActiveSubscription === true;
+  const checkoutHref = user?.email
+    ? `${CHECKOUT_BASE}?email=${encodeURIComponent(user.email)}`
+    : CHECKOUT_BASE;
+
   const handlePurchase = () => {
-    if (user?.email) {
-      // Redirect to dashboard/bots if logged in
-      router.push('/dashboard/bots');
-    } else {
-      // Redirect to login if not authenticated
-      router.push('/login?redirect=/bundle-offer');
+    if (!user) {
+      router.push("/login?redirect=/bundle-offer");
+      return;
     }
+    if (hasPaid) {
+      router.push("/dashboard/bots");
+      return;
+    }
+    // Same destination as dashboard when user has not paid: external checkout (new tab)
+    window.open(checkoutHref, "_blank", "noopener,noreferrer");
   };
   return (
     <main className="min-h-screen bg-gradient-to-br from-[#050816] via-[#0f172a] via-[#0f1f4a] to-[#050816]">

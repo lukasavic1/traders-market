@@ -2,12 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-<<<<<<< HEAD
 import { ImageLightboxModal } from "./components/ImageLightboxModal";
-=======
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
->>>>>>> 9e9836abfce9ab23d3537e064c25478309026951
 
 // Custom hook for scroll-triggered animations
 function useScrollAnimation(options = { threshold: 0.15, rootMargin: '0px 0px -100px 0px' }) {
@@ -175,20 +172,12 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect logged-in users to dashboard
-    if (!loading && user) {
-      const dashboardPath = hasActiveSubscription ? "/dashboard/bots" : "/dashboard";
-      router.replace(dashboardPath);
-      return;
-    }
-    // Trigger hero animation once on mount (only if not logged in)
-    if (!user) {
-      setHeroAnimated(true);
-    }
-  }, [user, loading, hasActiveSubscription, router]);
+    // Trigger hero animation once on mount
+    setHeroAnimated(true);
+  }, []);
 
-  // Show loading state while checking auth or redirecting
-  if (loading || user) {
+  // Show loading state while checking auth
+  if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
