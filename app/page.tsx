@@ -166,15 +166,9 @@ function ImageCarousel({ images, altPrefix, currencyLabel, strategyName }: { ima
 }
 
 export default function Home() {
-  const [sectionRef, isVisible] = useScrollAnimation();
-  const [heroAnimated, setHeroAnimated] = useState(false);
+  const [, isVisible] = useScrollAnimation();
   const { user, loading, hasActiveSubscription } = useAuth();
   const router = useRouter();
-
-  useEffect(() => {
-    // Trigger hero animation once on mount
-    setHeroAnimated(true);
-  }, []);
 
   // Show loading state while checking auth
   if (loading) {
@@ -190,13 +184,15 @@ export default function Home() {
 
   return (
     <main className="min-h-screen">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#050816] via-[#0f172a] via-[#0f1f4a] to-[#0a0e27]">
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
-            {/* Left Column - Text Content */}
-            <div className={`text-center lg:text-left ${heroAnimated ? 'animate-fade-in' : 'opacity-0'}`}>
-              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
+      {/* Hero Section - scroll-triggered animation */}
+      <AnimatedSection>
+        {(isVisible) => (
+          <section className="relative overflow-hidden bg-gradient-to-br from-[#050816] via-[#0f172a] via-[#0f1f4a] to-[#0a0e27]">
+            <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-32">
+              <div className="grid grid-cols-1 gap-12 lg:grid-cols-2 lg:gap-16 items-center">
+                {/* Left Column - Text Content */}
+                <div className={`text-center lg:text-left transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+                  <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
                 Unlock 10+ Proven Trading Strategies for{" "}
                 <span className="bg-gradient-to-r from-blue-400 via-blue-300 to-blue-400 bg-clip-text text-transparent">
                   MetaTrader 5
@@ -222,9 +218,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column - Advanced Trading Dashboard */}
-            <div className={`relative flex items-center justify-center ${heroAnimated ? 'animate-fade-in' : 'opacity-0'}`} style={{ animationDelay: heroAnimated ? "0.2s" : "0s" }}>
-              <div className="relative w-full max-w-2xl">
+                {/* Right Column - Advanced Trading Dashboard */}
+                <div className={`relative flex items-center justify-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-6'}`} style={{ transitionDelay: isVisible ? '0.2s' : '0ms' }}>
+                  <div className="relative w-full max-w-2xl">
                 {/* Background Glow Effect */}
                 <div className="absolute -inset-6 rounded-3xl bg-gradient-to-r from-blue-800/30 via-blue-700/25 to-blue-800/30 blur-3xl"></div>
                 
@@ -445,17 +441,19 @@ export default function Home() {
                       <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-blue-500/30 to-transparent animate-pulse"></div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Decorative elements - Darker blue with dark purple */}
-        <div className="absolute top-0 left-0 w-72 h-72 bg-blue-800/12 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob"></div>
-        <div className="absolute top-0 right-0 w-72 h-72 bg-blue-800/10 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000"></div>
-        <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-blue-800/12 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
-      </section>
+          {/* Decorative elements - Darker blue with dark purple */}
+          <div className="absolute top-0 left-0 w-72 h-72 bg-blue-800/12 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob"></div>
+          <div className="absolute top-0 right-0 w-72 h-72 bg-blue-800/10 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-2000"></div>
+          <div className="absolute bottom-0 left-1/2 w-72 h-72 bg-blue-800/12 rounded-full mix-blend-multiply filter blur-3xl opacity-25 animate-blob animation-delay-4000"></div>
+        </section>
+        )}
+      </AnimatedSection>
 
       {/* Transition Divider - Hero to Premium Bots */}
       <div className="relative h-8 -mt-8 bg-gradient-to-b from-[#050816] via-[#0f172a] to-[#0a0e27]">
@@ -712,28 +710,29 @@ export default function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom_right,transparent_30%,rgba(59,130,246,0.01)_50%,transparent_70%)]"></div>
       </div>
 
-      {/* Manual vs Automated Trading Section */}
-      <section 
-        ref={sectionRef}
-        className="relative bg-gradient-to-b from-[#0f1f4a] via-[#0f172a] to-[#050816] py-24 border-t border-blue-400/10"
-      >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className={`text-center mb-16 ${isVisible ? "animate-fade-in" : "opacity-0"}`}>
-            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-              Manual vs Automated Trading
-            </h2>
-            <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
-              See the difference between traditional manual trading and modern automated solutions
-            </p>
-          </div>
+      {/* Manual vs Automated Trading Section - scroll-triggered animation */}
+      <AnimatedSection>
+        {(isVisible) => (
+          <section
+            className="relative bg-gradient-to-b from-[#0f1f4a] via-[#0f172a] to-[#050816] py-24 border-t border-blue-400/10"
+          >
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className={`text-center mb-16 transition-all duration-700 ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}`}>
+                <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
+                  Manual vs Automated Trading
+                </h2>
+                <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
+                  See the difference between traditional manual trading and modern automated solutions
+                </p>
+              </div>
 
-          <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
-            {/* Manual Trading - Left Column */}
-            <div 
-              className={`${isVisible ? "animate-slide-in-left" : "opacity-0"} transition-all duration-300 hover:scale-[1.02]`}
-              style={{ animationDelay: isVisible ? "0.2s" : "0s" }}
-            >
-              <div className="rounded-xl border-2 border-red-500/30 bg-gradient-to-br from-red-900/10 to-slate-900/40 p-8 backdrop-blur-sm h-full transition-all duration-300 hover:border-red-500/50 hover:shadow-lg hover:shadow-red-500/10">
+              <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
+                {/* Manual Trading - Left Column */}
+                <div
+                  className={`transition-all duration-700 hover:scale-[1.02] ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}`}
+                  style={{ transitionDelay: isVisible ? "0.2s" : "0ms" }}
+                >
+                  <div className="rounded-xl border-2 border-red-500/30 bg-gradient-to-br from-red-900/10 to-slate-900/40 p-8 backdrop-blur-sm h-full transition-all duration-300 hover:border-red-500/50 hover:shadow-lg hover:shadow-red-500/10">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-3 rounded-lg bg-red-500/20">
                     <svg className="w-6 h-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -788,12 +787,12 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Automated Trading - Right Column */}
-            <div 
-              className={`${isVisible ? "animate-slide-in-right" : "opacity-0"} transition-all duration-300 hover:scale-[1.02]`}
-              style={{ animationDelay: isVisible ? "0.4s" : "0s" }}
-            >
-              <div className="rounded-xl border-2 border-blue-600/30 bg-gradient-to-br from-blue-950/30 via-[#0f1f4a]/25 to-blue-900/20 p-8 backdrop-blur-sm h-full transition-all duration-300 hover:border-blue-800/50 hover:shadow-lg hover:shadow-blue-600/25 hover:shadow-blue-800/25">
+                {/* Automated Trading - Right Column */}
+                <div
+                  className={`transition-all duration-700 hover:scale-[1.02] ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-6"}`}
+                  style={{ transitionDelay: isVisible ? "0.4s" : "0ms" }}
+                >
+                  <div className="rounded-xl border-2 border-blue-600/30 bg-gradient-to-br from-blue-950/30 via-[#0f1f4a]/25 to-blue-900/20 p-8 backdrop-blur-sm h-full transition-all duration-300 hover:border-blue-800/50 hover:shadow-lg hover:shadow-blue-600/25 hover:shadow-blue-800/25">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="p-3 rounded-lg bg-gradient-to-br from-blue-600/25 to-blue-800/25">
                     <svg className="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -846,10 +845,12 @@ export default function Home() {
                   ))}
                 </div>
               </div>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </section>
+          </section>
+        )}
+      </AnimatedSection>
 
       {/* Transition Divider - Manual vs Automated to No One-Size-Fits-All */}
       <div className="relative h-6 bg-gradient-to-b from-[#050816] via-[#0f1f4a]/20 to-[#050816]">

@@ -7,6 +7,7 @@ import { FirstTimeVisitorModal } from "./components/FirstTimeVisitorModal";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MonitoringProvider } from "@/components/MonitoringProvider";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,6 +38,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <MonitoringProvider>
             <AuthProvider>
+              <ScrollToTop />
               <Navigation />
               {children}
               <Footer />
