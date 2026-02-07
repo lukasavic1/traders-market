@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
+import { ImageLightboxModal } from "../components/ImageLightboxModal";
 
 // Custom hook for scroll-triggered animations
 function useScrollAnimation(options = { threshold: 0.15, rootMargin: '0px 0px -100px 0px' }) {
@@ -50,9 +51,10 @@ function AnimatedSection({ children }: { children: (isVisible: boolean) => React
   return <div ref={ref}>{children(isVisible)}</div>;
 }
 
-// Image Carousel Component for Backtesting Results
-function ImageCarousel({ images, altPrefix }: { images: string[]; altPrefix: string }) {
+// Image Carousel Component for Backtesting Results (optional currencyLabel e.g. EURUSD / GBPUSD, strategyName for lightbox)
+function ImageCarousel({ images, altPrefix, currencyLabel, strategyName }: { images: string[]; altPrefix: string; currencyLabel?: string; strategyName?: string }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const goToPrevious = () => {
     setCurrentIndex((prevIndex) => 
@@ -68,16 +70,24 @@ function ImageCarousel({ images, altPrefix }: { images: string[]; altPrefix: str
 
   return (
     <div className="relative w-full mb-6">
+      {currencyLabel && (
+        <p className="text-xs font-semibold text-amber-400/90 uppercase tracking-wider mb-2">{currencyLabel}</p>
+      )}
       {/* Carousel Container */}
       <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-gradient-to-br from-slate-900/90 to-black/90 border border-amber-500/20">
-        {/* Current Image */}
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Current Image - click to open full-screen lightbox */}
+        <button
+          type="button"
+          onClick={() => setIsLightboxOpen(true)}
+          className="absolute inset-0 flex items-center justify-center w-full h-full cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-inset rounded-lg"
+          aria-label="View image full screen"
+        >
           <img
             src={images[currentIndex]}
             alt={`${altPrefix} - Backtesting Result ${currentIndex + 1}`}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain pointer-events-none"
           />
-        </div>
+        </button>
 
         {/* Navigation Buttons */}
         {images.length > 1 && (
@@ -134,10 +144,21 @@ function ImageCarousel({ images, altPrefix }: { images: string[]; altPrefix: str
         )}
       </div>
 
-      {/* Placeholder Label */}
-      <div className="mt-2 text-center">
-        <span className="text-xs text-gray-500 italic">Backtesting results placeholder - Images will be uploaded</span>
-      </div>
+      <ImageLightboxModal
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        images={images}
+        initialIndex={currentIndex}
+        altPrefix={altPrefix}
+        strategyName={strategyName}
+        tradingPair={currencyLabel}
+      />
+
+      {!currencyLabel && (
+        <div className="mt-2 text-center">
+          <span className="text-xs text-gray-500 italic">Backtesting results</span>
+        </div>
+      )}
     </div>
   );
 }
@@ -358,7 +379,11 @@ export default function BundleInfoPage() {
                   href="/bundle-offer"
                   className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_34px_rgba(59,130,246,0.65)] hover:scale-[1.03] border border-blue-600/30"
                 >
-                  <span className="relative z-10">Buy for $259</span>
+                  <span className="relative z-10 flex flex-col items-center leading-tight">
+                  <span className="text-white/70 line-through text-base">$399</span>
+                  <span className="text-xs text-gray-300/90 uppercase tracking-wider mt-0.5">Limited time</span>
+                  <span className="text-amber-300 font-semibold">Buy for $259</span>
+                </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </Link>
 
@@ -597,78 +622,18 @@ export default function BundleInfoPage() {
                       </p>
                     </div>
 
-                    {/* Backtesting Results Carousel */}
-                    <ImageCarousel 
-                      images={[
-                        'data:image/svg+xml;base64,' + btoa(`
-                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="450" fill="#0a0e27"/>
-                            <defs>
-                              <linearGradient id="equityGrad1" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
-                                <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.05" />
-                              </linearGradient>
-                            </defs>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Equity Curve - Backtesting Results</text>
-                            <line x1="60" y1="80" x2="60" y2="380" stroke="#374151" stroke-width="2"/>
-                            <line x1="60" y1="380" x2="740" y2="380" stroke="#374151" stroke-width="2"/>
-                            <text x="30" y="90" font-family="monospace" font-size="11" fill="#6b7280">$15k</text>
-                            <text x="30" y="155" font-family="monospace" font-size="11" fill="#6b7280">$12k</text>
-                            <text x="30" y="230" font-family="monospace" font-size="11" fill="#6b7280">$9k</text>
-                            <text x="30" y="305" font-family="monospace" font-size="11" fill="#6b7280">$6k</text>
-                            <text x="30" y="380" font-family="monospace" font-size="11" fill="#6b7280">$3k</text>
-                            <polyline points="60,300 120,280 180,260 240,270 300,240 360,220 420,210 480,200 540,190 600,170 660,150 720,130" fill="url(#equityGrad1)" stroke="#10b981" stroke-width="2.5"/>
-                            <circle cx="720" cy="130" r="4" fill="#10b981"/>
-                            <rect x="600" y="40" width="130" height="80" fill="#0f172a" stroke="#fbbf24" stroke-width="1" rx="4"/>
-                            <text x="610" y="60" font-family="monospace" font-size="10" fill="#9ca3af">Win Rate: 68.5%</text>
-                            <text x="610" y="75" font-family="monospace" font-size="10" fill="#9ca3af">Profit Factor: 2.3</text>
-                            <text x="610" y="90" font-family="monospace" font-size="10" fill="#9ca3af">Total Trades: 247</text>
-                            <text x="610" y="105" font-family="monospace" font-size="10" fill="#10b981">Net Profit: +$11,234</text>
-                          </svg>
-                        `),
-                        'data:image/svg+xml;base64,' + btoa(`
-                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="450" fill="#0a0e27"/>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Monthly Performance Statistics</text>
-                            <rect x="80" y="70" width="640" height="320" fill="#0f172a" stroke="#374151" stroke-width="1" rx="8"/>
-                            ${[
-                              { month: 'Jan', profit: 850, y: 100 },
-                              { month: 'Feb', profit: 1200, y: 140 },
-                              { month: 'Mar', profit: -200, y: 180 },
-                              { month: 'Apr', profit: 950, y: 220 },
-                              { month: 'May', profit: 1400, y: 260 },
-                              { month: 'Jun', profit: 1100, y: 300 }
-                            ].map(m => `
-                              <text x="120" y="${m.y}" font-family="monospace" font-size="13" fill="#d1d5db" font-weight="bold">${m.month}</text>
-                              <rect x="170" y="${m.y - 14}" width="${Math.abs(m.profit) / 5}" height="18" fill="${m.profit > 0 ? '#10b981' : '#ef4444'}" opacity="0.8"/>
-                              <text x="${170 + Math.abs(m.profit) / 5 + 10}" y="${m.y}" font-family="monospace" font-size="12" fill="${m.profit > 0 ? '#10b981' : '#ef4444'}">$${m.profit}</text>
-                            `).join('')}
-                            <text x="400" y="360" font-family="monospace" font-size="12" fill="#9ca3af" text-anchor="middle">Average Monthly Return: $1,050 | Max Drawdown: -3.2%</text>
-                          </svg>
-                        `),
-                        'data:image/svg+xml;base64,' + btoa(`
-                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="450" fill="#0a0e27"/>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Trade Distribution Analysis</text>
-                            <circle cx="300" cy="230" r="120" fill="none" stroke="#374151" stroke-width="2"/>
-                            <path d="M 300 230 L 300 110 A 120 120 0 0 1 395 170 Z" fill="#10b981" opacity="0.8"/>
-                            <path d="M 300 230 L 395 170 A 120 120 0 0 1 385 310 Z" fill="#3b82f6" opacity="0.8"/>
-                            <path d="M 300 230 L 385 310 A 120 120 0 0 1 205 290 Z" fill="#8b5cf6" opacity="0.8"/>
-                            <path d="M 300 230 L 205 290 A 120 120 0 0 1 300 110 Z" fill="#ef4444" opacity="0.6"/>
-                            <rect x="470" y="140" width="250" height="200" fill="#0f172a" stroke="#374151" stroke-width="1" rx="4"/>
-                            <rect x="485" y="160" width="15" height="15" fill="#10b981" opacity="0.8"/>
-                            <text x="510" y="172" font-family="monospace" font-size="12" fill="#d1d5db">Winning Trades (68.5%)</text>
-                            <rect x="485" y="190" width="15" height="15" fill="#3b82f6" opacity="0.8"/>
-                            <text x="510" y="202" font-family="monospace" font-size="12" fill="#d1d5db">Breakeven (12%)</text>
-                            <rect x="485" y="220" width="15" height="15" fill="#8b5cf6" opacity="0.8"/>
-                            <text x="510" y="232" font-family="monospace" font-size="12" fill="#d1d5db">Small Loss (15%)</text>
-                            <rect x="485" y="250" width="15" height="15" fill="#ef4444" opacity="0.6"/>
-                            <text x="510" y="262" font-family="monospace" font-size="12" fill="#d1d5db">Stop Loss (4.5%)</text>
-                            <text x="400" y="400" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Total Trades: 247 | Avg Win: $156 | Avg Loss: $68</text>
-                          </svg>
-                        `)
-                      ]}
-                      altPrefix="NewYork-London Breakout"
+                    {/* Backtesting Results: 2 images EURUSD, 2 images GBPUSD */}
+                    <ImageCarousel
+                      currencyLabel="EURUSD"
+                      strategyName="NewYork–London Breakout"
+                      images={['/premium-bots/ny-london-breakout-eurusd-1.jpg', '/premium-bots/ny-london-breakout-eurusd-2.jpg']}
+                      altPrefix="NewYork-London Breakout EURUSD"
+                    />
+                    <ImageCarousel
+                      currencyLabel="GBPUSD"
+                      strategyName="NewYork–London Breakout"
+                      images={['/premium-bots/ny-london-breakout-gbpusd-1.jpg', '/premium-bots/ny-london-breakout-gbpusd-2.jpg']}
+                      altPrefix="NewYork-London Breakout GBPUSD"
                     />
 
                     {/* Core Concepts (Collapsed) */}
@@ -734,80 +699,18 @@ export default function BundleInfoPage() {
                       </p>
                     </div>
 
-                    {/* Backtesting Results Carousel */}
-                    <ImageCarousel 
-                      images={[
-                        'data:image/svg+xml;base64,' + btoa(`
-                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="450" fill="#0a0e27"/>
-                            <defs>
-                              <linearGradient id="equityGrad2" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
-                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.05" />
-                              </linearGradient>
-                            </defs>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Cumulative Profit - Grid Strategy</text>
-                            <line x1="60" y1="80" x2="60" y2="380" stroke="#374151" stroke-width="2"/>
-                            <line x1="60" y1="380" x2="740" y2="380" stroke="#374151" stroke-width="2"/>
-                            <text x="30" y="90" font-family="monospace" font-size="11" fill="#6b7280">$18k</text>
-                            <text x="30" y="155" font-family="monospace" font-size="11" fill="#6b7280">$15k</text>
-                            <text x="30" y="230" font-family="monospace" font-size="11" fill="#6b7280">$10k</text>
-                            <text x="30" y="305" font-family="monospace" font-size="11" fill="#6b7280">$5k</text>
-                            <text x="30" y="380" font-family="monospace" font-size="11" fill="#6b7280">$0</text>
-                            <polyline points="60,370 120,350 180,340 240,330 300,310 360,290 420,280 480,260 540,240 600,210 660,180 720,140" fill="url(#equityGrad2)" stroke="#3b82f6" stroke-width="2.5"/>
-                            <circle cx="720" cy="140" r="4" fill="#3b82f6"/>
-                            <rect x="600" y="40" width="130" height="80" fill="#0f172a" stroke="#fbbf24" stroke-width="1" rx="4"/>
-                            <text x="610" y="60" font-family="monospace" font-size="10" fill="#9ca3af">Win Rate: 71.2%</text>
-                            <text x="610" y="75" font-family="monospace" font-size="10" fill="#9ca3af">Profit Factor: 2.8</text>
-                            <text x="610" y="90" font-family="monospace" font-size="10" fill="#9ca3af">Total Trades: 183</text>
-                            <text x="610" y="105" font-family="monospace" font-size="10" fill="#3b82f6">Net Profit: +$17,845</text>
-                          </svg>
-                        `),
-                        'data:image/svg+xml;base64,' + btoa(`
-                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="450" fill="#0a0e27"/>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Drawdown Analysis</text>
-                            <line x1="60" y1="100" x2="60" y2="340" stroke="#374151" stroke-width="2"/>
-                            <line x1="60" y1="340" x2="740" y2="340" stroke="#374151" stroke-width="2"/>
-                            <line x1="60" y1="100" x2="740" y2="100" stroke="#10b981" stroke-width="1" stroke-dasharray="4,4"/>
-                            <text x="30" y="105" font-family="monospace" font-size="11" fill="#10b981">0%</text>
-                            <text x="30" y="160" font-family="monospace" font-size="11" fill="#6b7280">-2%</text>
-                            <text x="30" y="220" font-family="monospace" font-size="11" fill="#6b7280">-4%</text>
-                            <text x="30" y="280" font-family="monospace" font-size="11" fill="#6b7280">-6%</text>
-                            <text x="30" y="340" font-family="monospace" font-size="11" fill="#6b7280">-8%</text>
-                            <defs>
-                              <linearGradient id="ddGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" style="stop-color:#ef4444;stop-opacity:0.05" />
-                                <stop offset="100%" style="stop-color:#ef4444;stop-opacity:0.3" />
-                              </linearGradient>
-                            </defs>
-                            <polyline points="60,100 120,105 180,110 240,115 300,120 360,130 420,115 480,110 540,120 600,125 660,115 720,105" fill="url(#ddGrad)" stroke="#ef4444" stroke-width="2.5"/>
-                            <rect x="80" y="360" width="640" height="60" fill="#0f172a" stroke="#374151" stroke-width="1" rx="4"/>
-                            <text x="400" y="385" font-family="monospace" font-size="12" fill="#d1d5db" text-anchor="middle">Maximum Drawdown: -2.8% | Average Drawdown: -1.1%</text>
-                            <text x="400" y="405" font-family="monospace" font-size="11" fill="#10b981" text-anchor="middle">Recovery Factor: 6.37 | Sharpe Ratio: 2.14</text>
-                          </svg>
-                        `),
-                        'data:image/svg+xml;base64,' + btoa(`
-                          <svg width="800" height="450" xmlns="http://www.w3.org/2000/svg">
-                            <rect width="800" height="450" fill="#0a0e27"/>
-                            <text x="400" y="30" font-family="monospace" font-size="18" fill="#fbbf24" text-anchor="middle" font-weight="bold">Risk-Reward Distribution</text>
-                            <rect x="100" y="80" width="600" height="280" fill="#0f172a" stroke="#374151" stroke-width="1" rx="4"/>
-                            ${[
-                              { label: 'R:R 1:1', count: 15, x: 130, color: '#8b5cf6' },
-                              { label: 'R:R 1:2', count: 45, x: 230, color: '#3b82f6' },
-                              { label: 'R:R 1:3', count: 85, x: 330, color: '#10b981' },
-                              { label: 'R:R 1:4', count: 35, x: 430, color: '#06b6d4' },
-                              { label: 'R:R 1:5+', count: 18, x: 530, color: '#84cc16' }
-                            ].map(item => `
-                              <rect x="${item.x}" y="${340 - item.count * 2}" width="70" height="${item.count * 2}" fill="${item.color}" opacity="0.85" rx="2"/>
-                              <text x="${item.x + 35}" y="${340 - item.count * 2 - 8}" font-family="monospace" font-size="13" fill="${item.color}" text-anchor="middle" font-weight="bold">${item.count}</text>
-                              <text x="${item.x + 35}" y="375" font-family="monospace" font-size="10" fill="#9ca3af" text-anchor="middle">${item.label}</text>
-                            `).join('')}
-                            <text x="400" y="410" font-family="monospace" font-size="11" fill="#9ca3af" text-anchor="middle">Average R:R Achieved: 1:2.8 | Best Trade: +$845 | Worst Trade: -$142</text>
-                          </svg>
-                        `)
-                      ]}
-                      altPrefix="Grid"
+                    {/* Backtesting Results: 2 images EURUSD, 2 images GBPUSD */}
+                    <ImageCarousel
+                      currencyLabel="EURUSD"
+                      strategyName="Grid"
+                      images={['/premium-bots/grid-eurusd-1.jpg', '/premium-bots/grid-eurusd-2.jpg']}
+                      altPrefix="Grid EURUSD"
+                    />
+                    <ImageCarousel
+                      currencyLabel="GBPUSD"
+                      strategyName="Grid"
+                      images={['/premium-bots/grid-gbpusd-1.jpg', '/premium-bots/grid-gbpusd-2.jpg']}
+                      altPrefix="Grid GBPUSD"
                     />
 
                     {/* Core Concepts (Collapsed) */}
@@ -1032,7 +935,11 @@ export default function BundleInfoPage() {
                 href="/bundle-offer"
                 className="group relative inline-flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_34px_rgba(59,130,246,0.65)] hover:scale-[1.03] border border-blue-600/30"
               >
-                <span className="relative z-10">Buy for $259</span>
+                <span className="relative z-10 flex flex-col items-center leading-tight">
+                  <span className="text-white/70 line-through text-base">$399</span>
+                  <span className="text-xs text-gray-300/90 uppercase tracking-wider mt-0.5">Limited time</span>
+                  <span className="text-amber-300 font-semibold">Buy for $259</span>
+                </span>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-blue-700 to-blue-700 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               </Link>
               <div className="text-sm text-gray-400">
@@ -1302,8 +1209,10 @@ export default function BundleInfoPage() {
                     <div className="pointer-events-none absolute -inset-1 rounded-2xl bg-gradient-to-r from-blue-600/15 via-blue-700/15 to-blue-600/15 blur-xl" />
                     <div className="relative">
                       <div className="text-sm text-gray-300">Only</div>
-                      <div className="mt-2 flex items-end gap-2">
-                        <div className="text-5xl font-bold text-white">€259</div>
+                      <div className="mt-2 flex flex-col items-start gap-0.5 border-l-2 border-amber-500/30 pl-3">
+                        <div className="text-2xl font-bold text-white/60 line-through">€399</div>
+                        <span className="text-xs text-gray-400 uppercase tracking-wider">Today&apos;s price</span>
+                        <div className="text-5xl font-bold text-amber-300">€259</div>
                       </div>
                       <div className="mt-4 text-gray-300">
                         One-time payment • Immediate download • Lifetime access

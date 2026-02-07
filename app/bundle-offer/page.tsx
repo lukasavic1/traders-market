@@ -37,8 +37,12 @@ export default function BundleOffer() {
             <div className="relative">
               <div className="text-center">
                 <div className="mb-4">
-                  <span className="text-5xl font-bold text-white">$259</span>
-                  <span className="text-gray-400 ml-2">one-time payment</span>
+                  <div className="flex flex-col items-center gap-0.5 border border-amber-500/20 rounded-lg bg-amber-500/5 px-6 py-4">
+                    <span className="text-2xl font-bold text-white/60 line-through">$399</span>
+                    <span className="text-xs text-gray-400 uppercase tracking-wider">Limited time price</span>
+                    <span className="text-5xl font-bold text-amber-300">$259</span>
+                  </div>
+                  <span className="text-gray-400 mt-2 block">one-time payment</span>
                 </div>
                 
                 {/* Money-Back Guarantee Badge - Top */}
@@ -120,7 +124,10 @@ export default function BundleOffer() {
                 onClick={handlePurchase}
                 className="w-full rounded-lg bg-gradient-to-r from-blue-700 to-blue-600 px-8 py-4 text-lg font-semibold text-white transition-all duration-300 hover:from-blue-600 hover:to-blue-500 hover:shadow-[0_0_30px_rgba(59,130,246,0.6)] hover:scale-105 border border-blue-600/30"
               >
-                Purchase Bundle - $259
+                <span className="flex flex-col items-center leading-tight">
+                <span className="text-white/70 line-through text-sm">$399</span>
+                <span className="text-amber-300 font-semibold">Purchase Bundle - $259</span>
+              </span>
               </button>
 
               {/* Money-Back Guarantee - Detailed */}

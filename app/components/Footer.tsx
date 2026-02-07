@@ -10,8 +10,9 @@ export default function Footer() {
   const [copied, setCopied] = useState(false);
   const emailAddress = "admin@tradyx.ai";
 
-  const handleLinkClick = (href: string) => {
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     if (pathname === href) {
+      e.preventDefault();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
@@ -56,8 +57,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/"
-                  onClick={() => handleLinkClick("/")}
-                  scroll={true}
+                  onClick={(e) => handleLinkClick(e, "/")}
                   className="text-gray-400 hover:text-blue-400 transition-colors text-sm"
                 >
                   Home
@@ -66,8 +66,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/bundle"
-                  onClick={() => handleLinkClick("/bundle")}
-                  scroll={true}
+                  onClick={(e) => handleLinkClick(e, "/bundle")}
                   className="text-gray-400 hover:text-blue-400 transition-colors text-sm"
                 >
                   Bundle Offer
@@ -76,8 +75,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/blogs"
-                  onClick={() => handleLinkClick("/blogs")}
-                  scroll={true}
+                  onClick={(e) => handleLinkClick(e, "/blogs")}
                   className="text-gray-400 hover:text-blue-400 transition-colors text-sm"
                 >
                   Blogs
@@ -95,6 +93,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/privacy-policy"
+                  onClick={(e) => handleLinkClick(e, "/privacy-policy")}
                   className="text-gray-400 hover:text-blue-400 transition-colors text-sm"
                 >
                   Privacy Policy
@@ -103,6 +102,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/terms-and-conditions"
+                  onClick={(e) => handleLinkClick(e, "/terms-and-conditions")}
                   className="text-gray-400 hover:text-blue-400 transition-colors text-sm"
                 >
                   Terms & Conditions
@@ -164,6 +164,27 @@ export default function Footer() {
           <p className="text-center text-gray-500 text-sm">
             © 2025 Tradersmarket.io. All rights reserved.
           </p>
+        </div>
+
+        {/* Risk Disclosure */}
+        <div className="mt-8 pt-6 border-t border-blue-900/20 mx-auto max-w-2xl">
+          <p className="text-gray-500/90 text-xs font-medium uppercase tracking-wider mb-3 text-center">
+            Risk Disclosure
+          </p>
+          <div className="text-gray-500 text-xs leading-relaxed space-y-3 text-justify">
+            <p>
+              Trading foreign exchange on margin carries a high level of risk and may not be suitable for all investors. The use of leverage can work against you as well as for you. Before deciding to trade foreign exchange or use automated trading systems (Expert Advisors), you should carefully consider your investment objectives, level of experience, and risk appetite.
+            </p>
+            <p>
+              There is a possibility that you may sustain a loss of some or all of your initial investment, and therefore you should not invest money that you cannot afford to lose.
+            </p>
+            <p>
+              Past performance, including backtested or simulated results, is not indicative of future results. Simulated or hypothetical performance results have inherent limitations and do not represent actual trading. No representation is being made that any account will or is likely to achieve profits or losses similar to those shown.
+            </p>
+            <p>
+              The information provided on this website is for informational and educational purposes only and does not constitute investment advice, financial advice, or a recommendation to buy or sell any financial instrument. Any trading decisions you make are solely your responsibility.
+            </p>
+          </div>
         </div>
       </div>
     </footer>

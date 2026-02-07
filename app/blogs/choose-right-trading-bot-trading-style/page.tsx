@@ -112,7 +112,7 @@ export default function BlogPost() {
             </p>
 
             <p className="mt-8">
-              If you'd like to explore bots built on all of these strategies—trend-following, reversal, and breakout—our Trading Bots Bundle includes 10 professionally coded MetaTrader 5 bots for just $259. Each bot uses price action confirmation to improve reliability. You can check it out here: <Link href="/bundle" className="text-blue-400 hover:text-blue-300 underline">Bundle Offer</Link>
+              If you'd like to explore bots built on all of these strategies—trend-following, reversal, and breakout—our Trading Bots Bundle includes 10 professionally coded MetaTrader 5 bots for just <span className="inline-flex flex-col items-center align-middle rounded border border-amber-500/20 bg-amber-500/5 px-2 py-0.5"><span className="text-gray-500 line-through text-xs">$399</span><span className="font-semibold text-amber-300">$259</span></span>. Each bot uses price action confirmation to improve reliability. You can check it out here: <Link href="/bundle" className="text-blue-400 hover:text-blue-300 underline">Bundle Offer</Link>
             </p>
           </div>
         </div>

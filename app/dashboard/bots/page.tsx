@@ -270,18 +270,18 @@ export default function BotsDashboardPage() {
             <span className="text-amber-400 font-semibold text-sm uppercase tracking-wide">Premium</span>
             <span className="h-px flex-1 bg-gradient-to-r from-amber-500/40 to-transparent" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-stretch">
             {PREMIUM_BOTS.map((bot) => (
               <article
                 key={bot.name}
-                className="relative overflow-hidden rounded-xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/25 via-slate-900/80 to-amber-900/20 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300"
+                className="relative overflow-hidden rounded-xl border-2 border-amber-500/30 bg-gradient-to-br from-amber-950/25 via-slate-900/80 to-amber-900/20 hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 transition-all duration-300 flex flex-col"
               >
                 <div className="absolute top-4 right-4">
                   <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-xs font-bold text-amber-400 uppercase tracking-wider">
                     Premium
                   </span>
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col flex-1 min-h-0">
                   <div className="flex items-center gap-2 mb-1 pr-20">
                     <h3 className="text-lg font-bold text-white">{bot.name}</h3>
                     {BOT_NAME_TO_FILE[bot.name] && (
@@ -304,7 +304,7 @@ export default function BotsDashboardPage() {
                     )}
                   </div>
                   <p className="text-amber-400/90 text-sm font-medium mb-4">{bot.tagline}</p>
-                  <div className="space-y-3">
+                  <div className="space-y-3 flex-1 min-h-0">
                     <div className="rounded-lg border border-amber-500/15 bg-black/20 px-4 py-3">
                       <p className="text-[11px] uppercase tracking-wider text-amber-400/90 mb-1">Core Concept</p>
                       <p className="text-slate-300 text-sm leading-relaxed">{bot.coreConcept}</p>
@@ -325,6 +325,9 @@ export default function BotsDashboardPage() {
                       </ul>
                     </div>
                   </div>
+                  <p className="mt-auto pt-4 border-t border-white/5 text-slate-500 text-[11px] leading-relaxed shrink-0">
+                    Disclaimer: Past performance, including backtested or simulated results, is not indicative of future results. Trading foreign exchange involves significant risk and may result in the loss of some or all of your capital.
+                  </p>
                 </div>
               </article>
             ))}
@@ -337,17 +340,17 @@ export default function BotsDashboardPage() {
             <span className="text-blue-300 font-semibold text-sm uppercase tracking-widest">Standard</span>
             <span className="h-px flex-1 bg-gradient-to-r from-blue-500/50 via-blue-600/30 to-transparent" />
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
             {STRATEGY_BOTS.map((bot, index) => {
               const isOpen = expandedStrategyIndex === index;
               return (
                 <article
                   key={`${bot.name}-${index}`}
-                  className="group relative rounded-2xl border border-blue-900/50 bg-gradient-to-br from-slate-800/60 via-slate-800/50 to-blue-950/20 shadow-xl shadow-slate-950/50 overflow-hidden transition-all duration-300 hover:border-blue-600/50 hover:shadow-2xl hover:shadow-blue-950/30 hover:from-slate-800/70 hover:to-blue-950/30"
+                  className="group relative rounded-2xl border border-blue-900/50 bg-gradient-to-br from-slate-800/60 via-slate-800/50 to-blue-950/20 shadow-xl shadow-slate-950/50 overflow-hidden transition-all duration-300 hover:border-blue-600/50 hover:shadow-2xl hover:shadow-blue-950/30 hover:from-slate-800/70 hover:to-blue-950/30 flex flex-col"
                 >
                   {/* Top accent line - blue */}
                   <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-transparent via-blue-500/70 to-transparent opacity-90" />
-                  <div className="p-6">
+                  <div className="p-6 flex flex-col flex-1 min-h-0">
                     {/* Header: title + download */}
                     <div className="flex items-start gap-3">
                       <div className="min-w-0 flex-1">
@@ -403,7 +406,7 @@ export default function BotsDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setExpandedStrategyIndex(isOpen ? null : index)}
-                      className="mt-5 w-full rounded-xl border border-blue-700/40 bg-blue-950/30 px-4 py-3 text-sm font-medium text-blue-200/90 transition-all duration-200 hover:bg-blue-800/40 hover:text-blue-100 hover:border-blue-500/50 flex items-center justify-center gap-2"
+                      className="mt-5 w-full rounded-xl border border-blue-700/40 bg-blue-950/30 px-4 py-3 text-sm font-medium text-blue-200/90 transition-all duration-200 hover:bg-blue-800/40 hover:text-blue-100 hover:border-blue-500/50 flex items-center justify-center gap-2 shrink-0"
                       aria-expanded={isOpen}
                     >
                       {isOpen ? 'Show less' : 'Read more'}
@@ -412,6 +415,9 @@ export default function BotsDashboardPage() {
                       </svg>
                     </button>
                   </div>
+                  <p className="mt-auto pt-4 border-t border-white/5 text-slate-500 text-[11px] leading-relaxed px-6 pb-6 shrink-0">
+                    Disclaimer: Past performance, including backtested or simulated results, is not indicative of future results. Trading foreign exchange involves significant risk and may result in the loss of some or all of your capital.
+                  </p>
                 </article>
               );
             })}
