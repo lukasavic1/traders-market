@@ -29,6 +29,10 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
+## Supabase keep-alive (free tier)
+
+To avoid the project being paused after 7 days of database inactivity, a keep-alive cron runs every 3 days. **One-time setup:** run the migration once in [Supabase Dashboard → SQL Editor](https://supabase.com/dashboard): open `supabase/migrations/20250211000000_keepalive_ping.sql`, copy its contents, and run it. On Vercel, the cron is configured in `vercel.json`.
+
 ## Deploy on Vercel
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
